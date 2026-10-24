@@ -8,5 +8,7 @@ namespace GeometryHandbook.Core.Figures
 {
     internal class RegularPolygons
     {
+
+
     }
 }

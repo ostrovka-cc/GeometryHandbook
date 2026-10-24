@@ -10,7 +10,6 @@
     <Folder Include="Catalog\" />
     <Folder Include="Algorithms\" />
     <Folder Include="Analysis\" />
-    <Folder Include="Exceptions\" />
     <Folder Include="Persistence\" />
   </ItemGroup>
 
