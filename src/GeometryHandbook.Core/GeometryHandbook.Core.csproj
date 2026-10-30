@@ -6,4 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Catalog\" />
+    <Folder Include="Algorithms\" />
+    <Folder Include="Analysis\" />
+    <Folder Include="Persistence\" />
+  </ItemGroup>
+
 </Project>
