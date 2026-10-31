@@ -5,8 +5,110 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GeometryHandbook.App"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Довідник із геометрії" MinHeight="200" MinWidth="500" Height ="700" Width ="1100">
+   
+    <DockPanel >
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="Файл">
+                <MenuItem Header="Відкрити"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Вихід"></MenuItem>
+            </MenuItem>
 
-    </Grid>
+            <MenuItem Header="Фігура">
+                <MenuItem Header="Вибрати фігуру"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Змінити фігуру"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Скинути фігуру"></MenuItem>
+            </MenuItem>
+
+            <MenuItem Header="Дії">
+                <MenuItem Header="Повернутися назад"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Вихід"></MenuItem>
+            </MenuItem>
+
+            <MenuItem Header="Довідка" Background="AntiqueWhite">
+                <MenuItem Header="Відкрити"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Вихід"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <ToolBar   DockPanel.Dock="Top"   Background="SkyBlue">
+
+            <ToolBar.Resources>
+              
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="LightBlue"/>
+                    <Setter Property="Margin" Value="4,0"/>
+                </Style>
+            </ToolBar.Resources>
+            
+            <Button Content="+" ToolTip="Додати фігуру"/>
+            <Button Content="−" ToolTip="Видалити обрану фігуру"/>
+            <Button Content="Сортувати" ToolTip="Відсортувати фігури за площею"/>
+            <Button Content="Фільтр ±10%" ToolTip="Показати фігури з периметром ±10% від середнього"/>
+
+        </ToolBar>
+        <StatusBar DockPanel.Dock="Bottom" Background="AliceBlue">
+            <TextBlock Margin="5, 0, 10, 0" Text="Колір = "></TextBlock>
+            <TextBlock Text="Масштаб = "></TextBlock>
+        </StatusBar>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="300"/>
+            </Grid.ColumnDefinitions>
+
+            <GroupBox Grid.Column="0" Header="Список фігур" Margin="4">
+                <ListBox>
+                    <ListBoxItem Content="Коло, S = 12,57"/>
+                    <ListBoxItem Content="Квадрат, S = 4,00"/>
+                    <ListBoxItem Content="Трикутник, S = 6,00"/>
+                </ListBox>
+            </GroupBox>
+
+
+            <Border Grid.Column="1" Margin="4"
+        Background="White" BorderBrush="Gray" BorderThickness="1">
+                <TextBlock Text="Тут буде малюнок обраної фігури"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               Foreground="Gray"/>
+            </Border>
+
+
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+
+                    <RowDefinition Height="*"/>
+
+                </Grid.RowDefinitions>
+
+
+                <GroupBox Grid.Row="0" Header="Нова фігура" Margin="4">
+                    <StackPanel Margin="4">
+                        <TextBlock Text="Тип:"/>
+                        <ComboBox Margin="0,2,0,6"/>
+                        <TextBlock Text="Підтип:"/>
+                        <ComboBox Margin="0,2,0,6"/>
+                        <TextBlock Text="(тут будуть поля для розмірів)" Foreground="Gray"/>
+                        <Button Content="Додати" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </GroupBox>
+
+
+                <GroupBox Grid.Row="1" Header="Характеристики" Margin="4">
+                    <DataGrid/>
+                </GroupBox>
+            </Grid>
+        </Grid>
+
+       
+
+    </DockPanel>
 </Window>
