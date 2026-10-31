@@ -13,11 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
     <Folder Include="Converters\" />
     <Folder Include="NewFolder\" />
     <Folder Include="Services\" />
-    <Folder Include="ViewModels\" />
   </ItemGroup>
 
 </Project>
