@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:GeometryHandbook.App"
+        xmlns:local="clr-namespace:GeometryHandbook.App" xmlns:viewmodels="clr-namespace:GeometryHandbook.App.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
         mc:Ignorable="d"
         Title="Довідник із геометрії" MinHeight="200" MinWidth="500" Height ="700" Width ="1100">
    
@@ -45,7 +45,7 @@
                 </Style>
             </ToolBar.Resources>
             
-            <Button Content="+" ToolTip="Додати фігуру"/>
+            <Button Content="+" ToolTip="Додати фігуру" Command="{Binding AddCircleCommand}"/>
             <Button Content="−" ToolTip="Видалити обрану фігуру"/>
             <Button Content="Сортувати" ToolTip="Відсортувати фігури за площею"/>
             <Button Content="Фільтр ±10%" ToolTip="Показати фігури з периметром ±10% від середнього"/>
@@ -64,11 +64,13 @@
             </Grid.ColumnDefinitions>
 
             <GroupBox Grid.Column="0" Header="Список фігур" Margin="4">
-                <ListBox>
-                    <ListBoxItem Content="Коло, S = 12,57"/>
-                    <ListBoxItem Content="Квадрат, S = 4,00"/>
-                    <ListBoxItem Content="Трикутник, S = 6,00"/>
-                </ListBox>
+                <ListBox 
+                    ItemsSource ="{Binding Figures}"
+                    SelectedItem ="{Binding SelectedFigure}"
+                    DisplayMemberPath="Title"
+                    />
+                    
+               
             </GroupBox>
 
 
