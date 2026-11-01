@@ -74,7 +74,7 @@
 
             <Border Grid.Column="1" Margin="4"
         Background="White" BorderBrush="Gray" BorderThickness="1">
-                <TextBlock Text="Тут буде малюнок обраної фігури"
+                <TextBlock Text="МЯВ"
                HorizontalAlignment="Center"
                VerticalAlignment="Center"
                Foreground="Gray"/>
@@ -96,7 +96,7 @@
                         <ComboBox Margin="0,2,0,6"/>
                         <TextBlock Text="Підтип:"/>
                         <ComboBox Margin="0,2,0,6"/>
-                        <TextBlock Text="(тут будуть поля для розмірів)" Foreground="Gray"/>
+                        <TextBlock Text="(мяв)" Foreground="Gray"/>
                         <Button Content="Додати" Margin="0,8,0,0"/>
                     </StackPanel>
                 </GroupBox>
