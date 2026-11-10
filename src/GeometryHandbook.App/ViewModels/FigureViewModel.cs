@@ -14,6 +14,9 @@ namespace GeometryHandbook.App.ViewModels
             Model = model;
         }
 
+        // Характеристики фігури для таблиці властивостей (назва — значення)
+        public IReadOnlyList<FigureProperty> Properties => Model.GetProperties();
+
         // Текст для рядка списку 
         public string Title => Model.ToString();
     }
