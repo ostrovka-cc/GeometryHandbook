@@ -7,6 +7,21 @@
         mc:Ignorable="d"
         Title="Довідник із геометрії" MinHeight="200" MinWidth="500" Height ="700" Width ="1100">
 
+    <Window.Resources>
+        <DrawingBrush x:Key="GridBrush"
+                      TileMode="Tile"
+                      Viewport="0,0,20,20" ViewportUnits="Absolute"
+                      Viewbox="0,0,20,20" ViewboxUnits="Absolute">
+            <DrawingBrush.Drawing>
+                <GeometryDrawing Geometry="M0,0 L20,0 M0,0 L0,20">
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="LightGray" Thickness="1"/>
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+    </Window.Resources>
+
     <DockPanel >
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Файл">
@@ -45,7 +60,6 @@
                 </Style>
             </ToolBar.Resources>
 
-            <!-- виправлено: AddCircleCommand → AddFigureCommand -->
             <Button Content="+" ToolTip="Додати фігуру" Command="{Binding AddFigureCommand}"/>
             <Button Content="−" ToolTip="Видалити обрану фігуру"/>
             <Button Content="Сортувати" ToolTip="Відсортувати фігури за площею"/>
@@ -53,9 +67,8 @@
 
         </ToolBar>
         <StatusBar DockPanel.Dock="Bottom" Background="AliceBlue">
-            <TextBlock Margin="5,0,10,0" Text="{Binding StatusMessage}"/>
-            <TextBlock Text="Колір = "/>
-            <TextBlock Text="Масштаб = "/>
+            <TextBlock Text="Сітка: 1 клітинка = 1 см" Margin="0,0,10,0"/>
+            <TextBlock x:Name="ZoomText" Text="Масштаб: 100%"/>
         </StatusBar>
 
         <Grid>
@@ -73,24 +86,66 @@
                     />
             </GroupBox>
 
-
             <Border Grid.Column="1" Margin="4"
         Background="White" BorderBrush="Gray" BorderThickness="1">
-                <TextBlock Text="МЯВ"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               Foreground="Gray"/>
+                <ScrollViewer x:Name="FigureScroll"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto"
+                  PreviewMouseWheel="FigureScroll_PreviewMouseWheel">
+                    <Grid Width="20040" Height="20040">
+                        <Grid.LayoutTransform>
+                            <ScaleTransform x:Name="SheetScale" ScaleX="1" ScaleY="1"/>
+                        </Grid.LayoutTransform>
+
+                        <Rectangle x:Name="MinorGrid">
+                            <Rectangle.Fill>
+                                <DrawingBrush TileMode="Tile"
+                                  Viewport="0,0,20,20" ViewportUnits="Absolute"
+                                  Viewbox="0,0,20,20" ViewboxUnits="Absolute">
+                                    <DrawingBrush.Drawing>
+                                        <GeometryDrawing Geometry="M0,0 L20,0 M0,0 L0,20">
+                                            <GeometryDrawing.Pen>
+                                                <Pen x:Name="MinorGridPen" Brush="#E0E0E0" Thickness="2"/>
+                                            </GeometryDrawing.Pen>
+                                        </GeometryDrawing>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+
+                        <Rectangle>
+                            <Rectangle.Fill>
+                                <DrawingBrush TileMode="Tile"
+                                  Viewport="0,0,200,200" ViewportUnits="Absolute"
+                                  Viewbox="0,0,200,200" ViewboxUnits="Absolute">
+                                    <DrawingBrush.Drawing>
+                                        <GeometryDrawing Geometry="M0,0 L200,0 M0,0 L0,200">
+                                            <GeometryDrawing.Pen>
+                                                <Pen x:Name="MajorGridPen" Brush="#A0A0A0" Thickness="4"/>
+                                            </GeometryDrawing.Pen>
+                                        </GeometryDrawing>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+
+                        <Path x:Name="FigurePath"
+                  Data="{Binding SelectedFigure.Geometry}"
+                  Fill="{Binding SelectedFigure.Model.FillColor}"
+                  Stroke="Black"
+                  StrokeThickness="2"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="20"/>
+                    </Grid>
+                </ScrollViewer>
             </Border>
-
-
+            
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-
                     <RowDefinition Height="*"/>
-
                 </Grid.RowDefinitions>
-
 
                 <GroupBox Grid.Row="0" Header="Нова фігура" Margin="4">
                     <StackPanel Margin="4">
@@ -119,9 +174,20 @@
                     </StackPanel>
                 </GroupBox>
 
-
                 <GroupBox Grid.Row="1" Header="Характеристики" Margin="4">
-                    <DataGrid/>
+                    <DataGrid ItemsSource="{Binding SelectedFigure.Properties}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Характеристика"
+                                                Binding="{Binding Name}"
+                                                Width="*"/>
+                            <DataGridTextColumn Header="Значення"
+                                                Binding="{Binding Value, StringFormat={}{0:0.##}}"
+                                                Width="Auto"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </GroupBox>
             </Grid>
         </Grid>

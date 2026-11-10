@@ -17,14 +17,16 @@ namespace GeometryHandbook.Core.Figures.Quadrilaterals
         {
             _sideA = EnsurePositive(sideA, nameof(sideA));
             _sideB = EnsurePositive(sideB, nameof(sideB));
-            _angle = EnsurePositive(angle, nameof(angle));
 
-            // При куті 180° паралелограм вироджується у відрізок
-            if (angle >= 180)
+            // Кут перевіряється окремо від сторін, бо для нього діють інші межі:
+            // строго між 0° і 180°, інакше паралелограм вироджується у відрізок
+            if (!double.IsFinite(angle) || angle <= 0 || angle >= 180)
             {
                 throw new InvalidFigureDimensionsException(nameof(angle),
                     $"Кут {angle}° неприпустимий: кут паралелограма має бути більшим за 0° і меншим за 180°.");
             }
+
+            _angle = angle;
         }
 
         // Конструктор за замовчуванням: паралелограм зі сторонами 5 і 3 та кутом 60°

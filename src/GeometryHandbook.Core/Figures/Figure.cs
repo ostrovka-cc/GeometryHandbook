@@ -7,6 +7,7 @@ namespace GeometryHandbook.Core.Figures
     // та операції (масштабування, присвоєння); конкретні формули реалізують нащадки.
     public abstract class Figure
     {
+        public const double MaxDimension = 1000;
         // Колір заливки фігури 
         public string FillColor { get; set; } = "LightSkyBlue";
 
@@ -71,8 +72,8 @@ namespace GeometryHandbook.Core.Figures
 
         public override string ToString() => $"Назва фігури: {DisplayName}, її площа {Area:F2}";
 
-        // Перевіряє, що значення є скінченним додатним числом, інакше кидає
-        // InvalidFigureDimensionsException. Повертає перевірене значення,
+        // Перевіряє, що значення є скінченним додатним числом, не більшим за MaxDimension;
+        // інакше кидає InvalidFigureDimensionsException. Повертає перевірене значення,
         // щоб його можна було одразу присвоїти полю в конструкторі нащадка.
         protected static double EnsurePositive(double value, string parameterName)
         {
@@ -80,6 +81,14 @@ namespace GeometryHandbook.Core.Figures
             {
                 throw new InvalidFigureDimensionsException(parameterName, $"Значення {value} неприпустиме: очікується додатне число.");
             }
+
+            // Занадто великі розміри не вміщуються на полотно навіть із прокруткою
+            if (value > MaxDimension)
+            {
+                throw new InvalidFigureDimensionsException(parameterName,
+                    $"Значення {value} завелике: розміри фігури не можуть перевищувати {MaxDimension}.");
+            }
+
             return value;
         }
 
