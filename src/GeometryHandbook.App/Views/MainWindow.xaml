@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:GeometryHandbook.App" xmlns:viewmodels="clr-namespace:GeometryHandbook.App.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
         mc:Ignorable="d"
         Title="Довідник із геометрії" MinHeight="200" MinWidth="500" Height ="700" Width ="1100">
-   
+
     <DockPanel >
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Файл">
@@ -38,22 +38,24 @@
         <ToolBar   DockPanel.Dock="Top"   Background="SkyBlue">
 
             <ToolBar.Resources>
-              
+
                 <Style TargetType="Button">
                     <Setter Property="Background" Value="LightBlue"/>
                     <Setter Property="Margin" Value="4,0"/>
                 </Style>
             </ToolBar.Resources>
-            
-            <Button Content="+" ToolTip="Додати фігуру" Command="{Binding AddCircleCommand}"/>
+
+            <!-- виправлено: AddCircleCommand → AddFigureCommand -->
+            <Button Content="+" ToolTip="Додати фігуру" Command="{Binding AddFigureCommand}"/>
             <Button Content="−" ToolTip="Видалити обрану фігуру"/>
             <Button Content="Сортувати" ToolTip="Відсортувати фігури за площею"/>
             <Button Content="Фільтр ±10%" ToolTip="Показати фігури з периметром ±10% від середнього"/>
 
         </ToolBar>
         <StatusBar DockPanel.Dock="Bottom" Background="AliceBlue">
-            <TextBlock Margin="5, 0, 10, 0" Text="Колір = "></TextBlock>
-            <TextBlock Text="Масштаб = "></TextBlock>
+            <TextBlock Margin="5,0,10,0" Text="{Binding StatusMessage}"/>
+            <TextBlock Text="Колір = "/>
+            <TextBlock Text="Масштаб = "/>
         </StatusBar>
 
         <Grid>
@@ -69,8 +71,6 @@
                     SelectedItem ="{Binding SelectedFigure}"
                     DisplayMemberPath="Title"
                     />
-                    
-               
             </GroupBox>
 
 
@@ -95,11 +95,27 @@
                 <GroupBox Grid.Row="0" Header="Нова фігура" Margin="4">
                     <StackPanel Margin="4">
                         <TextBlock Text="Тип:"/>
-                        <ComboBox Margin="0,2,0,6"/>
+                        <ComboBox Margin="0,2,0,6"
+                                  ItemsSource ="{Binding Editor.TypeNames}"
+                                  SelectedItem="{Binding Editor.SelectedTypeName}"/>
                         <TextBlock Text="Підтип:"/>
-                        <ComboBox Margin="0,2,0,6"/>
-                        <TextBlock Text="(мяв)" Foreground="Gray"/>
-                        <Button Content="Додати" Margin="0,8,0,0"/>
+                        <ComboBox Margin="0,2,0,6"
+                                  ItemsSource ="{Binding Editor.Subtypes}"
+                                  SelectedItem="{Binding Editor.SelectedSubtype}"
+                                  DisplayMemberPath="SubtypeName"/>
+
+                        <ItemsControl ItemsSource="{Binding Editor.Parameters}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,2,0,4">
+                                        <TextBlock Text="{Binding Name}"/>
+                                        <TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Button Content="Додати" Margin="0,8,0,0" Command="{Binding AddFigureCommand}"/>
                     </StackPanel>
                 </GroupBox>
 
@@ -109,8 +125,6 @@
                 </GroupBox>
             </Grid>
         </Grid>
-
-       
 
     </DockPanel>
 </Window>

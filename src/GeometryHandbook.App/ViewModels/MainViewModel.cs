@@ -1,15 +1,27 @@
 ﻿using System.Collections.ObjectModel;
 using GeometryHandbook.App.Commands;
-using GeometryHandbook.Core.Figures;
+using GeometryHandbook.Core.Catalog;
+using GeometryHandbook.Core.Exceptions;
 
 namespace GeometryHandbook.App.ViewModels
 {
-    // Головна ViewModel вікна: зберігає список фігур, обрану фігуру
-    // та команди, до яких прив'язані кнопки й пункти меню.
+    // Головна ViewModel вікна: зберігає список фігур, обрану фігуру,
+    // редактор нової фігури, текст рядка статусу та команди,
+    // до яких прив'язані кнопки й пункти меню.
     public class MainViewModel : ViewModelBase
     {
         // Поле для властивості SelectedFigure
         private FigureViewModel? _selectedFigure;
+
+        // Поле для властивості StatusMessage
+        private string _statusMessage = "Готово";
+
+        // Конструктор: отримує каталог фігур, створює редактор і команди
+        public MainViewModel(FigureCatalog catalog)
+        {
+            Editor = new FigureEditorViewModel(catalog);
+            AddFigureCommand = new RelayCommand(AddFigure);
+        }
 
         // Список фігур. ObservableCollection сама повідомляє ListBox
         // про додавання й видалення елементів.
@@ -27,22 +39,39 @@ namespace GeometryHandbook.App.ViewModels
             }
         }
 
-        // Команда додавання кола (тимчасова — для перевірки першого зрізу)
-        public RelayCommand AddCircleCommand { get; }
+        // Редактор нової фігури: вибір типу, підтипу та введення параметрів
+        public FigureEditorViewModel Editor { get; }
 
-        // Конструктор: створює команди
-        public MainViewModel()
+        // Текст у рядку статусу: результат останньої дії або повідомлення про помилку
+        public string StatusMessage
         {
-            AddCircleCommand = new RelayCommand(AddCircle);
+            get { return _statusMessage; }
+            set
+            {
+                _statusMessage = value;
+                OnPropertyChanged();
+            }
         }
 
-        // Додає у список нове коло. Радіус залежить від кількості фігур,
-        // щоб кожне наступне коло було більшим за попереднє.
-        private void AddCircle()
+        // Команда додавання фігури, заданої в редакторі
+        public RelayCommand AddFigureCommand { get; }
+
+        // Створює фігуру з даних редактора й додає її у список.
+        // Якщо дані неправильні (порожнє поле, не число, неможливі розміри),
+        // фігура не додається, а причина показується в рядку статусу.
+        private void AddFigure()
         {
-            var circle = new Circle(Figures.Count + 1);
-            var figureViewModel = new FigureViewModel(circle);
-            Figures.Add(figureViewModel);
+            try
+            {
+                var figureViewModel = new FigureViewModel(Editor.CreateFigure());
+                Figures.Add(figureViewModel);
+                SelectedFigure = figureViewModel;
+                StatusMessage = $"Додано: {figureViewModel.Model.DisplayName}";
+            }
+            catch (FigureException ex)
+            {
+                StatusMessage = ex.Message;
+            }
         }
     }
 }
