@@ -1,4 +1,7 @@
-﻿using GeometryHandbook.Core.Figures;
+﻿using GeometryHandbook.App.Drawing;
+using GeometryHandbook.Core.Figures;
+using System.Windows.Media;
+using GeometryHandbook.App.Drawing;
 
 namespace GeometryHandbook.App.ViewModels
 {
@@ -17,6 +20,8 @@ namespace GeometryHandbook.App.ViewModels
         // Характеристики фігури для таблиці властивостей (назва — значення)
         public IReadOnlyList<FigureProperty> Properties => Model.GetProperties();
 
+
+        public Geometry Geometry => FigureGeometryBuilder.Build(Model);
         // Текст для рядка списку 
         public string Title => Model.ToString();
     }
