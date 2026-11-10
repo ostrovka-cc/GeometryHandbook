@@ -3,96 +3,76 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:GeometryHandbook.App" xmlns:viewmodels="clr-namespace:GeometryHandbook.App.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:MainViewModel}"
+        xmlns:vm="clr-namespace:GeometryHandbook.App.ViewModels"
         mc:Ignorable="d"
-        Title="Довідник із геометрії" MinHeight="200" MinWidth="500" Height ="700" Width ="1100">
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="Довідник з геометрії"
+        Height="650"
+        Width="1150"
+        Style="{StaticResource WindowStyle}">
 
-    <Window.Resources>
-        <DrawingBrush x:Key="GridBrush"
-                      TileMode="Tile"
-                      Viewport="0,0,20,20" ViewportUnits="Absolute"
-                      Viewbox="0,0,20,20" ViewboxUnits="Absolute">
-            <DrawingBrush.Drawing>
-                <GeometryDrawing Geometry="M0,0 L20,0 M0,0 L0,20">
-                    <GeometryDrawing.Pen>
-                        <Pen Brush="LightGray" Thickness="1"/>
-                    </GeometryDrawing.Pen>
-                </GeometryDrawing>
-            </DrawingBrush.Drawing>
-        </DrawingBrush>
-    </Window.Resources>
+    <DockPanel>
 
-    <DockPanel >
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Файл">
-                <MenuItem Header="Відкрити"></MenuItem>
+            <MenuItem Header="_Файл">
+                <MenuItem Header="_Відкрити..."/>
+                <MenuItem Header="_Зберегти..."/>
                 <Separator/>
-                <MenuItem Header="Вихід"></MenuItem>
+                <MenuItem Header="Ви_хід"/>
             </MenuItem>
-
-            <MenuItem Header="Фігура">
-                <MenuItem Header="Вибрати фігуру"></MenuItem>
+            <MenuItem Header="Ф_ігура">
+                <MenuItem Header="_Додати" Command="{Binding AddFigureCommand}"/>
+                <MenuItem Header="Ви_далити"/>
                 <Separator/>
-                <MenuItem Header="Змінити фігуру"></MenuItem>
-                <Separator/>
-                <MenuItem Header="Скинути фігуру"></MenuItem>
+                <MenuItem Header="_Сортувати за площею"/>
+                <MenuItem Header="_Фільтр за периметром ±10%"/>
             </MenuItem>
-
-            <MenuItem Header="Дії">
-                <MenuItem Header="Повернутися назад"></MenuItem>
-                <Separator/>
-                <MenuItem Header="Вихід"></MenuItem>
-            </MenuItem>
-
-            <MenuItem Header="Довідка" Background="AntiqueWhite">
-                <MenuItem Header="Відкрити"></MenuItem>
-                <Separator/>
-                <MenuItem Header="Вихід"></MenuItem>
+            <MenuItem Header="_Довідка">
+                <MenuItem Header="_Про програму"/>
             </MenuItem>
         </Menu>
-        <ToolBar   DockPanel.Dock="Top"   Background="SkyBlue">
 
-            <ToolBar.Resources>
-
-                <Style TargetType="Button">
-                    <Setter Property="Background" Value="LightBlue"/>
-                    <Setter Property="Margin" Value="4,0"/>
-                </Style>
-            </ToolBar.Resources>
-
-            <Button Content="+" ToolTip="Додати фігуру" Command="{Binding AddFigureCommand}"/>
-            <Button Content="−" ToolTip="Видалити обрану фігуру"/>
-            <Button Content="Сортувати" ToolTip="Відсортувати фігури за площею"/>
-            <Button Content="Фільтр ±10%" ToolTip="Показати фігури з периметром ±10% від середнього"/>
-
+        <ToolBar DockPanel.Dock="Top">
+            <Button Content="Додати" ToolTip="Додати нову фігуру" Command="{Binding AddFigureCommand}"/>
+            <Button Content="Видалити" ToolTip="Видалити вибрану фігуру"/>
+            <Separator/>
+            <Button Content="Сортувати" ToolTip="Сортувати фігури за площею"/>
+            <Button Content="Фільтр ±10%" ToolTip="Фігури з периметром у межах ±10% від середнього"/>
         </ToolBar>
-        <StatusBar DockPanel.Dock="Bottom" Background="AliceBlue">
-            <TextBlock Text="Сітка: 1 клітинка = 1 см" Margin="0,0,10,0"/>
-            <TextBlock x:Name="ZoomText" Text="Масштаб: 100%"/>
+
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem Content="{Binding StatusMessage}"/>
+            <Separator/>
+            <StatusBarItem Content="Сітка: 1 клітинка = 1 см"/>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock x:Name="ZoomText" Text="Масштаб: 100%"/>
+            </StatusBarItem>
         </StatusBar>
 
-        <Grid>
+        <Grid Margin="6">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="240"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="300"/>
             </Grid.ColumnDefinitions>
 
-            <GroupBox Grid.Column="0" Header="Список фігур" Margin="4">
-                <ListBox 
-                    ItemsSource ="{Binding Figures}"
-                    SelectedItem ="{Binding SelectedFigure}"
-                    DisplayMemberPath="Title"
-                    />
-            </GroupBox>
+            <Border Grid.Column="0" Style="{StaticResource PanelStyle}">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Фігури" Style="{StaticResource HeaderStyle}"/>
+                    <ListBox ItemsSource="{Binding Figures}"
+                             SelectedItem="{Binding SelectedFigure}"
+                             DisplayMemberPath="Title"/>
+                </DockPanel>
+            </Border>
 
-            <Border Grid.Column="1" Margin="4"
-        Background="White" BorderBrush="Gray" BorderThickness="1">
+            <Border Grid.Column="1" Style="{StaticResource PanelStyle}" Padding="4">
                 <ScrollViewer x:Name="FigureScroll"
-                  HorizontalScrollBarVisibility="Auto"
-                  VerticalScrollBarVisibility="Auto"
-                  PreviewMouseWheel="FigureScroll_PreviewMouseWheel">
-                    <Grid Width="20040" Height="20040">
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto"
+                              PreviewMouseWheel="FigureScroll_PreviewMouseWheel">
+                    <Grid Width="20040" Height="20040" Background="White"
+                          HorizontalAlignment="Left" VerticalAlignment="Top">
                         <Grid.LayoutTransform>
                             <ScaleTransform x:Name="SheetScale" ScaleX="1" ScaleY="1"/>
                         </Grid.LayoutTransform>
@@ -100,8 +80,8 @@
                         <Rectangle x:Name="MinorGrid">
                             <Rectangle.Fill>
                                 <DrawingBrush TileMode="Tile"
-                                  Viewport="0,0,20,20" ViewportUnits="Absolute"
-                                  Viewbox="0,0,20,20" ViewboxUnits="Absolute">
+                                              Viewport="0,0,20,20" ViewportUnits="Absolute"
+                                              Viewbox="0,0,20,20" ViewboxUnits="Absolute">
                                     <DrawingBrush.Drawing>
                                         <GeometryDrawing Geometry="M0,0 L20,0 M0,0 L0,20">
                                             <GeometryDrawing.Pen>
@@ -116,8 +96,8 @@
                         <Rectangle>
                             <Rectangle.Fill>
                                 <DrawingBrush TileMode="Tile"
-                                  Viewport="0,0,200,200" ViewportUnits="Absolute"
-                                  Viewbox="0,0,200,200" ViewboxUnits="Absolute">
+                                              Viewport="0,0,200,200" ViewportUnits="Absolute"
+                                              Viewbox="0,0,200,200" ViewboxUnits="Absolute">
                                     <DrawingBrush.Drawing>
                                         <GeometryDrawing Geometry="M0,0 L200,0 M0,0 L0,200">
                                             <GeometryDrawing.Pen>
@@ -130,65 +110,65 @@
                         </Rectangle>
 
                         <Path x:Name="FigurePath"
-                  Data="{Binding SelectedFigure.Geometry}"
-                  Fill="{Binding SelectedFigure.Model.FillColor}"
-                  Stroke="Black"
-                  StrokeThickness="2"
-                  HorizontalAlignment="Left"
-                  VerticalAlignment="Top"
-                  Margin="20"/>
+                              Data="{Binding SelectedFigure.Geometry}"
+                              Fill="{Binding SelectedFigure.Model.FillColor}"
+                              Stroke="{StaticResource TextBrush}"
+                              StrokeThickness="2"
+                              Margin="20"
+                              HorizontalAlignment="Left"
+                              VerticalAlignment="Top"/>
                     </Grid>
                 </ScrollViewer>
             </Border>
-            
+
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <GroupBox Grid.Row="0" Header="Нова фігура" Margin="4">
-                    <StackPanel Margin="4">
-                        <TextBlock Text="Тип:"/>
-                        <ComboBox Margin="0,2,0,6"
-                                  ItemsSource ="{Binding Editor.TypeNames}"
+                <Border Grid.Row="0" Style="{StaticResource PanelStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Нова фігура" Style="{StaticResource HeaderStyle}"/>
+
+                        <TextBlock Text="Тип" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox ItemsSource="{Binding Editor.TypeNames}"
                                   SelectedItem="{Binding Editor.SelectedTypeName}"/>
-                        <TextBlock Text="Підтип:"/>
-                        <ComboBox Margin="0,2,0,6"
-                                  ItemsSource ="{Binding Editor.Subtypes}"
+
+                        <TextBlock Text="Підтип" Style="{StaticResource LabelStyle}"/>
+                        <ComboBox ItemsSource="{Binding Editor.Subtypes}"
                                   SelectedItem="{Binding Editor.SelectedSubtype}"
                                   DisplayMemberPath="SubtypeName"/>
 
                         <ItemsControl ItemsSource="{Binding Editor.Parameters}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Margin="0,2,0,4">
-                                        <TextBlock Text="{Binding Name}"/>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" Style="{StaticResource LabelStyle}"/>
                                         <TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <Button Content="Додати" Margin="0,8,0,0" Command="{Binding AddFigureCommand}"/>
+                        <Button Content="Додати фігуру"
+                                Style="{StaticResource MainButtonStyle}"
+                                Command="{Binding AddFigureCommand}"
+                                ToolTip="Створити фігуру з введеними параметрами"/>
                     </StackPanel>
-                </GroupBox>
+                </Border>
 
-                <GroupBox Grid.Row="1" Header="Характеристики" Margin="4">
-                    <DataGrid ItemsSource="{Binding SelectedFigure.Properties}"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True"
-                              HeadersVisibility="Column">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Характеристика"
-                                                Binding="{Binding Name}"
-                                                Width="*"/>
-                            <DataGridTextColumn Header="Значення"
-                                                Binding="{Binding Value, StringFormat={}{0:0.##}}"
-                                                Width="Auto"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </GroupBox>
+                <Border Grid.Row="1" Style="{StaticResource PanelStyle}">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Характеристики" Style="{StaticResource HeaderStyle}"/>
+                        <DataGrid ItemsSource="{Binding SelectedFigure.Properties}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Назва" Binding="{Binding Name}" Width="*"/>
+                                <DataGridTextColumn Header="Значення" Binding="{Binding Value, StringFormat={}{0:0.##}}" Width="Auto"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </Border>
             </Grid>
         </Grid>
 
