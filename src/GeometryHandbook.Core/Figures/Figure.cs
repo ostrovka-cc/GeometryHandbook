@@ -9,7 +9,7 @@ namespace GeometryHandbook.Core.Figures
     {
         public const double MaxDimension = 1000;
         // Колір заливки фігури 
-        public string FillColor { get; set; } = "LightSkyBlue";
+        public string FillColor { get; set; } = "SteelBlue";
 
         // Службова назва типу фігури, що записується у файл 
         public abstract string TypeKey { get; }
@@ -22,6 +22,7 @@ namespace GeometryHandbook.Core.Figures
 
         // Периметр фігури (для кола — довжина кола); обчислюється нащадком
         public abstract double Perimeter { get; }
+        public abstract IReadOnlyList<string> GetFormulas();
 
         // Захищений конструктор за замовчуванням. 
         protected Figure()

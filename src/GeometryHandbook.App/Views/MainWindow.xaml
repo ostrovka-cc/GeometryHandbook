@@ -13,7 +13,7 @@
 
     <DockPanel>
 
-        <Menu DockPanel.Dock="Top">
+        <Menu DockPanel.Dock="Top" Background="{StaticResource BackgroundBrush}">
             <MenuItem Header="_Файл">
                 <MenuItem Header="_Відкрити..."/>
                 <MenuItem Header="_Зберегти..."/>
@@ -21,48 +21,81 @@
                 <MenuItem Header="Ви_хід"/>
             </MenuItem>
             <MenuItem Header="Ф_ігура">
-                <MenuItem Header="_Додати" Command="{Binding AddFigureCommand}"/>
+                <MenuItem Header="_Нова фігура..." Command="{Binding AddFigureCommand}"/>
+                <MenuItem Header="_Редагувати..."/>
                 <MenuItem Header="Ви_далити"/>
-                <Separator/>
+            </MenuItem>
+            <MenuItem Header="_Дії">
                 <MenuItem Header="_Сортувати за площею"/>
                 <MenuItem Header="_Фільтр за периметром ±10%"/>
+                <Separator/>
+                <MenuItem Header="_Колір заливки..."/>
+                <MenuItem Header="_Масштабувати..."/>
             </MenuItem>
             <MenuItem Header="_Довідка">
                 <MenuItem Header="_Про програму"/>
             </MenuItem>
         </Menu>
 
-        <ToolBar DockPanel.Dock="Top">
-            <Button Content="Додати" ToolTip="Додати нову фігуру" Command="{Binding AddFigureCommand}"/>
+        <ToolBar DockPanel.Dock="Top" Background="{StaticResource BackgroundBrush}" Padding="6,4">
+            <Button Content="Відкрити" ToolTip="Відкрити фігури з файлу"/>
+            <Button Content="Зберегти" ToolTip="Зберегти фігури у файл"/>
+            <Separator/>
+            <Button Content="+ Нова фігура"
+                    Style="{StaticResource BlueButtonStyle}"
+                    Command="{Binding AddFigureCommand}"
+                    ToolTip="Додати нову фігуру"
+                    Margin="4,0"/>
+            <Button Content="Редагувати" ToolTip="Змінити розміри вибраної фігури"/>
             <Button Content="Видалити" ToolTip="Видалити вибрану фігуру"/>
             <Separator/>
             <Button Content="Сортувати" ToolTip="Сортувати фігури за площею"/>
             <Button Content="Фільтр ±10%" ToolTip="Фігури з периметром у межах ±10% від середнього"/>
+            <Separator/>
+            <Button Content="Колір" ToolTip="Змінити колір заливки вибраної фігури"/>
+            <Button Content="Масштаб" ToolTip="Масштабувати вибрану фігуру"/>
         </ToolBar>
 
-        <StatusBar DockPanel.Dock="Bottom">
+        <StatusBar DockPanel.Dock="Bottom"
+                   Background="{StaticResource BackgroundBrush}"
+                   Foreground="{StaticResource SecondaryTextBrush}">
             <StatusBarItem Content="{Binding StatusMessage}"/>
             <Separator/>
-            <StatusBarItem Content="Сітка: 1 клітинка = 1 см"/>
+            <StatusBarItem Content="1 клітинка = 1 см"/>
             <Separator/>
             <StatusBarItem>
                 <TextBlock x:Name="ZoomText" Text="Масштаб: 100%"/>
             </StatusBarItem>
         </StatusBar>
 
-        <Grid Margin="6">
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="240"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="280"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Style="{StaticResource PanelStyle}">
+            <Border Grid.Column="0"
+                    BorderBrush="{StaticResource LineBrush}"
+                    BorderThickness="0,0,1,0"
+                    Padding="10">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="Фігури" Style="{StaticResource HeaderStyle}"/>
+                    <TextBlock DockPanel.Dock="Top" Text="Список фігур" Style="{StaticResource HeaderStyle}"/>
                     <ListBox ItemsSource="{Binding Figures}"
                              SelectedItem="{Binding SelectedFigure}"
-                             DisplayMemberPath="Title"/>
+                             Background="Transparent"
+                             BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,4">
+                                    <TextBlock Text="{Binding Model.DisplayName}"/>
+                                    <TextBlock Text="{Binding Model.Area, StringFormat='S = {0:0.##} см²'}"
+                                               Foreground="{StaticResource SecondaryTextBrush}"
+                                               FontSize="12"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </DockPanel>
             </Border>
 
@@ -71,8 +104,11 @@
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto"
                               PreviewMouseWheel="FigureScroll_PreviewMouseWheel">
-                    <Grid Width="20040" Height="20040" Background="White"
-                          HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Grid Width="20040"
+                          Height="20040"
+                          Background="{StaticResource CanvasBrush}"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Top">
                         <Grid.LayoutTransform>
                             <ScaleTransform x:Name="SheetScale" ScaleX="1" ScaleY="1"/>
                         </Grid.LayoutTransform>
@@ -85,7 +121,7 @@
                                     <DrawingBrush.Drawing>
                                         <GeometryDrawing Geometry="M0,0 L20,0 M0,0 L0,20">
                                             <GeometryDrawing.Pen>
-                                                <Pen x:Name="MinorGridPen" Brush="#E0E0E0" Thickness="2"/>
+                                                <Pen x:Name="MinorGridPen" Brush="#2A2A2A" Thickness="2"/>
                                             </GeometryDrawing.Pen>
                                         </GeometryDrawing>
                                     </DrawingBrush.Drawing>
@@ -101,7 +137,7 @@
                                     <DrawingBrush.Drawing>
                                         <GeometryDrawing Geometry="M0,0 L200,0 M0,0 L0,200">
                                             <GeometryDrawing.Pen>
-                                                <Pen x:Name="MajorGridPen" Brush="#A0A0A0" Thickness="4"/>
+                                                <Pen x:Name="MajorGridPen" Brush="#3E3E3E" Thickness="4"/>
                                             </GeometryDrawing.Pen>
                                         </GeometryDrawing>
                                     </DrawingBrush.Drawing>
@@ -112,7 +148,7 @@
                         <Path x:Name="FigurePath"
                               Data="{Binding SelectedFigure.Geometry}"
                               Fill="{Binding SelectedFigure.Model.FillColor}"
-                              Stroke="{StaticResource TextBrush}"
+                              Stroke="{StaticResource AccentBrush}"
                               StrokeThickness="2"
                               Margin="20"
                               HorizontalAlignment="Left"
@@ -121,55 +157,45 @@
                 </ScrollViewer>
             </Border>
 
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <Border Grid.Row="0" Style="{StaticResource PanelStyle}">
-                    <StackPanel>
-                        <TextBlock Text="Нова фігура" Style="{StaticResource HeaderStyle}"/>
-
-                        <TextBlock Text="Тип" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox ItemsSource="{Binding Editor.TypeNames}"
-                                  SelectedItem="{Binding Editor.SelectedTypeName}"/>
-
-                        <TextBlock Text="Підтип" Style="{StaticResource LabelStyle}"/>
-                        <ComboBox ItemsSource="{Binding Editor.Subtypes}"
-                                  SelectedItem="{Binding Editor.SelectedSubtype}"
-                                  DisplayMemberPath="SubtypeName"/>
-
-                        <ItemsControl ItemsSource="{Binding Editor.Parameters}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Name}" Style="{StaticResource LabelStyle}"/>
-                                        <TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <Button Content="Додати фігуру"
-                                Style="{StaticResource MainButtonStyle}"
-                                Command="{Binding AddFigureCommand}"
-                                ToolTip="Створити фігуру з введеними параметрами"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Row="1" Style="{StaticResource PanelStyle}">
-                    <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="Характеристики" Style="{StaticResource HeaderStyle}"/>
-                        <DataGrid ItemsSource="{Binding SelectedFigure.Properties}">
+            <Border Grid.Column="2"
+                    BorderBrush="{StaticResource LineBrush}"
+                    BorderThickness="1,0,0,0"
+                    Padding="10">
+                <TabControl Background="Transparent" BorderThickness="0">
+                    <TabItem Header="Характеристики">
+                        <DataGrid ItemsSource="{Binding SelectedFigure.Properties}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="{StaticResource LineBrush}"
+                                  Background="Transparent"
+                                  RowBackground="Transparent"
+                                  BorderThickness="0"
+                                  Margin="0,8,0,0">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Назва" Binding="{Binding Name}" Width="*"/>
                                 <DataGridTextColumn Header="Значення" Binding="{Binding Value, StringFormat={}{0:0.##}}" Width="Auto"/>
                             </DataGrid.Columns>
                         </DataGrid>
-                    </DockPanel>
-                </Border>
-            </Grid>
+                    </TabItem>
+                    <TabItem Header="Формули">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                            <ItemsControl ItemsSource="{Binding SelectedFigure.Formulas}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{StaticResource LineBrush}"
+                                                BorderThickness="0,0,0,1"
+                                                Padding="0,8">
+                                            <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
+            </Border>
         </Grid>
 
     </DockPanel>

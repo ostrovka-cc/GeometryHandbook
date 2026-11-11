@@ -1,37 +1,31 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using GeometryHandbook.Core.Catalog;
 using GeometryHandbook.Core.Exceptions;
 using GeometryHandbook.Core.Figures;
 
 namespace GeometryHandbook.App.ViewModels
 {
-    // ViewModel редактора нової фігури.
-    // Керує вибором типу й підтипу фігури, створює поля введення
-    // для параметрів обраної фігури та створює фігуру через каталог.
+    // Дані вікна «Нова фігура»: вибір типу й підтипу, поля параметрів і створення фігури
     public class FigureEditorViewModel : ViewModelBase
     {
-        // Каталог фігур — джерело типів, підтипів і назв параметрів
         private readonly FigureCatalog _catalog;
-
-        // Поле для властивості SelectedTypeName
         private string? _selectedTypeName;
-
-        // Поле для властивості SelectedSubtype
         private FigureDescriptor? _selectedSubtype;
+        private string _errorMessage = "";
 
-        // Конструктор: отримує каталог і одразу обирає перший тип,
-        // щоб редактор при запуску не був порожнім
         public FigureEditorViewModel(FigureCatalog catalog)
         {
             _catalog = catalog;
+
+            // Одразу вибираємо перший тип, щоб вікно не відкривалось порожнім
             SelectedTypeName = TypeNames[0];
         }
 
-        // Назви типів фігур для першого випадаючого списку
+        // Назви типів для першого випадного списку
         public IReadOnlyList<string> TypeNames => _catalog.TypeNames;
 
-        // Обраний тип фігури (наприклад, «Трикутники»).
-        // Під час зміни оновлює список підтипів і обирає перший із них.
+        // Вибраний тип («Коло», «Трикутники»...)
         public string? SelectedTypeName
         {
             get { return _selectedTypeName; }
@@ -39,12 +33,9 @@ namespace GeometryHandbook.App.ViewModels
             {
                 _selectedTypeName = value;
                 OnPropertyChanged();
-
-                // Subtypes залежить від SelectedTypeName, тому повідомляємо інтерфейс,
-                // що список підтипів теж змінився
                 OnPropertyChanged(nameof(Subtypes));
 
-                // Автоматично обираємо перший підтип нового типу
+                // Після зміни типу автоматично вибираємо його перший підтип
                 if (Subtypes.Count > 0)
                 {
                     SelectedSubtype = Subtypes[0];
@@ -56,22 +47,21 @@ namespace GeometryHandbook.App.ViewModels
             }
         }
 
-        // Підтипи обраного типу для другого випадаючого списку
+        // Підтипи вибраного типу для другого випадного списку
         public IReadOnlyList<FigureDescriptor> Subtypes
         {
             get
             {
-                if (SelectedTypeName == null)
+                if (_selectedTypeName == null)
                 {
                     return new List<FigureDescriptor>();
                 }
 
-                return _catalog.GetSubtypes(SelectedTypeName);
+                return _catalog.GetSubtypes(_selectedTypeName);
             }
         }
 
-        // Обраний підтип фігури (наприклад, «Прямокутний»).
-        // Під час зміни перебудовує поля введення під параметри цієї фігури.
+        // Вибраний підтип; при зміні створюємо нові поля введення
         public FigureDescriptor? SelectedSubtype
         {
             get { return _selectedSubtype; }
@@ -80,26 +70,38 @@ namespace GeometryHandbook.App.ViewModels
                 _selectedSubtype = value;
                 OnPropertyChanged();
 
-                // Прибираємо поля попередньої фігури
                 Parameters.Clear();
 
-                // Створюємо по одному полю на кожен параметр нової фігури
-                if (value != null)
+                if (_selectedSubtype != null)
                 {
-                    foreach (string parameterName in value.ParameterNames)
+                    foreach (string name in _selectedSubtype.ParameterNames)
                     {
-                        Parameters.Add(new ParameterInputViewModel(parameterName));
+                        Parameters.Add(new ParameterInputViewModel(name));
                     }
                 }
-            }   
+
+                ErrorMessage = "";
+            }
         }
 
-        // Поля введення для параметрів обраної фігури
-        public ObservableCollection<ParameterInputViewModel> Parameters { get; } = new();
+        // Поля введення параметрів (по одному на кожен параметр підтипу)
+        public ObservableCollection<ParameterInputViewModel> Parameters { get; } = new ObservableCollection<ParameterInputViewModel>();
 
-        // Створює фігуру з введених значень.
-        // Кидає FigureException, якщо підтип не обрано, поле заповнене неправильно
-        // або розміри неможливі (наприклад, трикутник 1, 2, 10).
+        // Текст помилки під полями; порожній, якщо помилки немає
+        public string ErrorMessage
+        {
+            get { return _errorMessage; }
+            set
+            {
+                _errorMessage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        // Фігура, створена кнопкою «Додати»; її забирає WpfDialogService після закриття вікна
+        public Figure? CreatedFigure { get; private set; }
+
+        // Створює фігуру з введених значень; кидає FigureException, якщо щось не так
         public Figure CreateFigure()
         {
             if (SelectedSubtype == null)
@@ -107,15 +109,31 @@ namespace GeometryHandbook.App.ViewModels
                 throw new FigureException("Оберіть тип і підтип фігури.");
             }
 
-            // Збираємо числа з усіх полів у порядку параметрів
-            List<double> values = new List<double>();
+            // Перетворюємо текст кожного поля на число (GetValue кидає FigureException, якщо там не число)
+            var values = new List<double>();
             foreach (ParameterInputViewModel parameter in Parameters)
             {
                 values.Add(parameter.GetValue());
             }
 
-            // Каталог сам знає, яку фігуру створити з цих чисел
+            // Конструктор фігури сам перевірить, чи можна її побудувати
             return SelectedSubtype.Create(values);
+        }
+
+        // Викликається кнопкою «Додати»: true, якщо фігуру створено; інакше показуємо помилку
+        public bool TryCreateFigure()
+        {
+            try
+            {
+                CreatedFigure = CreateFigure();
+                ErrorMessage = "";
+                return true;
+            }
+            catch (FigureException ex)
+            {
+                ErrorMessage = ex.Message;
+                return false;
+            }
         }
     }
 }

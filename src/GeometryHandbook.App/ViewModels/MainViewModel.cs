@@ -1,34 +1,30 @@
 ﻿using System.Collections.ObjectModel;
 using GeometryHandbook.App.Commands;
+using GeometryHandbook.App.Services;
 using GeometryHandbook.Core.Catalog;
-using GeometryHandbook.Core.Exceptions;
+using GeometryHandbook.Core.Figures;
 
 namespace GeometryHandbook.App.ViewModels
 {
-    // Головна ViewModel вікна: зберігає список фігур, обрану фігуру,
-    // редактор нової фігури, текст рядка статусу та команди,
-    // до яких прив'язані кнопки й пункти меню.
+    // Головна ViewModel: список фігур, вибрана фігура, команди головного вікна
     public class MainViewModel : ViewModelBase
     {
-        // Поле для властивості SelectedFigure
+        private readonly FigureCatalog _catalog;
+        private readonly IDialogService _dialogService;
         private FigureViewModel? _selectedFigure;
-
-        // Поле для властивості StatusMessage
         private string _statusMessage = "Готово";
 
-        // Конструктор: отримує каталог фігур, створює редактор і команди
-        public MainViewModel(FigureCatalog catalog)
+        public MainViewModel(FigureCatalog catalog, IDialogService dialogService)
         {
-            Editor = new FigureEditorViewModel(catalog);
+            _catalog = catalog;
+            _dialogService = dialogService;
             AddFigureCommand = new RelayCommand(AddFigure);
         }
 
-        // Список фігур. ObservableCollection сама повідомляє ListBox
-        // про додавання й видалення елементів.
-        public ObservableCollection<FigureViewModel> Figures { get; } = new();
+        // Усі додані фігури (список ліворуч)
+        public ObservableCollection<FigureViewModel> Figures { get; } = new ObservableCollection<FigureViewModel>();
 
-        // Фігура, обрана у списку (null — нічого не обрано).
-        // ListBox записує сюди фігуру, на яку клацнув користувач.
+        // Фігура, вибрана у списку; її малюємо й показуємо характеристики
         public FigureViewModel? SelectedFigure
         {
             get { return _selectedFigure; }
@@ -39,10 +35,7 @@ namespace GeometryHandbook.App.ViewModels
             }
         }
 
-        // Редактор нової фігури: вибір типу, підтипу та введення параметрів
-        public FigureEditorViewModel Editor { get; }
-
-        // Текст у рядку статусу: результат останньої дії або повідомлення про помилку
+        // Текст у рядку стану внизу вікна
         public string StatusMessage
         {
             get { return _statusMessage; }
@@ -53,25 +46,26 @@ namespace GeometryHandbook.App.ViewModels
             }
         }
 
-        // Команда додавання фігури, заданої в редакторі
         public RelayCommand AddFigureCommand { get; }
 
-        // Створює фігуру з даних редактора й додає її у список.
-        // Якщо дані неправильні (порожнє поле, не число, неможливі розміри),
-        // фігура не додається, а причина показується в рядку статусу.
+        // Відкриває вікно «Нова фігура» і додає створену фігуру до списку
         private void AddFigure()
         {
-            try
+            // Для кожного вікна — новий редактор із чистими полями
+            var editor = new FigureEditorViewModel(_catalog);
+
+            Figure? figure = _dialogService.ShowFigureEditor(editor);
+
+            if (figure == null)
             {
-                var figureViewModel = new FigureViewModel(Editor.CreateFigure());
-                Figures.Add(figureViewModel);
-                SelectedFigure = figureViewModel;
-                StatusMessage = $"Додано: {figureViewModel.Model.DisplayName}";
+                StatusMessage = "Додавання скасовано";
+                return;
             }
-            catch (FigureException ex)
-            {
-                StatusMessage = ex.Message;
-            }
+
+            var figureViewModel = new FigureViewModel(figure);
+            Figures.Add(figureViewModel);
+            SelectedFigure = figureViewModel;
+            StatusMessage = $"Додано: {figure.DisplayName}";
         }
     }
 }

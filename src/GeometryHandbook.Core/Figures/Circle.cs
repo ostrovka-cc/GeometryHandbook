@@ -55,6 +55,17 @@
             };
         }
 
+        // Формули кола з підставленим радіусом
+        public override IReadOnlyList<string> GetFormulas()
+        {
+            return new List<string>
+            {
+                $"Діаметр: d = 2 · r = 2 · {Radius:0.##} = {Diameter:0.##}",
+                $"Площа: S = π · r² = {Math.PI:0.##} · {Radius:0.##}² = {Area:0.##}",
+                $"Довжина кола: L = 2 · π · r = 2 · {Math.PI:0.##} · {Radius:0.##} = {Perimeter:0.##}"
+            };
+        }
+
         // Копіює радіус з іншого кола. Приведення типу безпечне,
         // оскільки AssignFrom уже перевірив, що source — це Circle.
         protected override void AssignCore(Figure source)

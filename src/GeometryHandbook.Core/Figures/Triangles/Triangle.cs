@@ -28,6 +28,25 @@ namespace GeometryHandbook.Core.Figures.Triangles
             }
         }
 
+        // Формули трикутника; підтипи (рівносторонній, рівнобедрений, прямокутний) успадковують їх
+        public override IReadOnlyList<string> GetFormulas()
+        {
+            double a = Sides[0];
+            double b = Sides[1];
+            double c = Sides[2];
+            double p = Perimeter / 2;
+
+            return new List<string>
+            {
+                $"Периметр: P = a + b + c = {a:0.##} + {b:0.##} + {c:0.##} = {Perimeter:0.##}",
+                $"Півпериметр: p = P / 2 = {Perimeter:0.##} / 2 = {p:0.##}",
+                $"Площа (формула Герона): S = √(p(p − a)(p − b)(p − c)) = √({p:0.##} · {p - a:0.##} · {p - b:0.##} · {p - c:0.##}) = {Area:0.##}",
+                $"Радіус вписаного кола: r = S / p = {Area:0.##} / {p:0.##} = {Inradius:0.##}",
+                $"Радіус описаного кола: R = a · b · c / (4 · S) = {a:0.##} · {b:0.##} · {c:0.##} / (4 · {Area:0.##}) = {Circumradius:0.##}",
+                $"Середня лінія (паралельна a): m = a / 2 = {a:0.##} / 2 = {a / 2:0.##}"
+            };
+        }
+
         // Конструктор за замовчуванням: створює прямокутний трикутник зі сторонами 3, 4, 5
         public Triangle() : this(3, 4, 5)
         {

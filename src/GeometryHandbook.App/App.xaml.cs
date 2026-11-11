@@ -1,21 +1,24 @@
 ﻿using System.Windows;
+using GeometryHandbook.App.Services;
 using GeometryHandbook.App.ViewModels;
 using GeometryHandbook.App.Views;
 using GeometryHandbook.Core.Catalog;
 
 namespace GeometryHandbook.App
 {
-    // Точка входу WPF-застосунку
     public partial class App : Application
     {
-        // Запуск програми: створює каталог фігур, головну ViewModel і вікно,
-        // передає їх одне одному та показує вікно
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
+            // Каталог усіх фігур, які вміє створювати програма
             var catalog = new FigureCatalog();
-            var mainViewModel = new MainViewModel(catalog);
+
+            // Сервіс, через який ViewModel відкриває вікна
+            var dialogService = new WpfDialogService();
+
+            var mainViewModel = new MainViewModel(catalog, dialogService);
             var mainWindow = new MainWindow(mainViewModel);
             mainWindow.Show();
         }

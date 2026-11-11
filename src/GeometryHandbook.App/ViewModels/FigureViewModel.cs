@@ -24,5 +24,9 @@ namespace GeometryHandbook.App.ViewModels
         public Geometry Geometry => FigureGeometryBuilder.Build(Model);
         // Текст для рядка списку 
         public string Title => Model.ToString();
+
+        // Формули для вкладки «Формули»
+        public IReadOnlyList<string> Formulas => Model.GetFormulas();
     }
+
 }

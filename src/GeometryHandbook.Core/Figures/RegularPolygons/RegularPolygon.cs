@@ -28,6 +28,23 @@ namespace GeometryHandbook.Core.Figures.RegularPolygons
             _side = EnsurePositive(side, nameof(side));
         }
 
+        // Формули правильного многокутника; п'ятикутник і шестикутник успадковують їх
+        public override IReadOnlyList<string> GetFormulas()
+        {
+            int n = Sides.Count;
+            double a = Sides[0];
+            double halfAngle = 180.0 / n;
+
+            return new List<string>
+            {
+                $"Периметр: P = n · a = {n} · {a:0.##} = {Perimeter:0.##}",
+                $"Внутрішній кут: α = 180° · (n − 2) / n = 180° · {n - 2} / {n} = {InteriorAngle:0.##}°",
+                $"Радіус описаного кола: R = a / (2 · sin(180° / n)) = {a:0.##} / (2 · sin {halfAngle:0.##}°) = {Circumradius:0.##}",
+                $"Радіус вписаного кола: r = a / (2 · tg(180° / n)) = {a:0.##} / (2 · tg {halfAngle:0.##}°) = {Inradius:0.##}",
+                $"Площа: S = P · r / 2 = {Perimeter:0.##} · {Inradius:0.##} / 2 = {Area:0.##}"
+            };
+        }
+
         // Конструктор за замовчуванням: правильний п'ятикутник зі стороною 2
         public RegularPolygon() : this(5, 2)
         {

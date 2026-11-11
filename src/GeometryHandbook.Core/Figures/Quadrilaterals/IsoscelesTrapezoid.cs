@@ -29,6 +29,25 @@ namespace GeometryHandbook.Core.Figures.Quadrilaterals
             }
         }
 
+        // Формули рівнобедреної трапеції (a — нижня основа, b — верхня, c — бічна сторона)
+        public override IReadOnlyList<string> GetFormulas()
+        {
+            double a = _bottomBase;
+            double b = _topBase;
+            double c = _leg;
+            double x = (a - b) / 2;
+
+            return new List<string>
+            {
+                $"Периметр: P = a + b + 2 · c = {a:0.##} + {b:0.##} + 2 · {c:0.##} = {Perimeter:0.##}",
+                $"Проєкція бічної сторони: x = (a − b) / 2 = ({a:0.##} − {b:0.##}) / 2 = {x:0.##}",
+                $"Висота: h = √(c² − x²) = √({c:0.##}² − {x:0.##}²) = {Height:0.##}",
+                $"Середня лінія: m = (a + b) / 2 = ({a:0.##} + {b:0.##}) / 2 = {Midline:0.##}",
+                $"Площа: S = m · h = {Midline:0.##} · {Height:0.##} = {Area:0.##}",
+                $"Діагональ: d = √(h² + (a − x)²) = √({Height:0.##}² + {a - x:0.##}²) = {Diagonals[0]:0.##}"
+            };
+        }
+
         // Конструктор за замовчуванням: трапеція з основами 10 і 4 та бічною стороною 5 (висота 4)
         public IsoscelesTrapezoid() : this(10, 4, 5)
         {

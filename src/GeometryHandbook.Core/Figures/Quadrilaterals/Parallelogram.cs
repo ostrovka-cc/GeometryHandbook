@@ -29,6 +29,21 @@ namespace GeometryHandbook.Core.Figures.Quadrilaterals
             _angle = angle;
         }
 
+        // Формули паралелограма; прямокутник, квадрат і ромб успадковують їх
+        public override IReadOnlyList<string> GetFormulas()
+        {
+            double a = Sides[0];
+            double b = Sides[1];
+
+            return new List<string>
+            {
+                $"Периметр: P = 2 · (a + b) = 2 · ({a:0.##} + {b:0.##}) = {Perimeter:0.##}",
+                $"Висота: h = b · sin α = {b:0.##} · sin {_angle:0.##}° = {Height:0.##}",
+                $"Площа: S = a · h = {a:0.##} · {Height:0.##} = {Area:0.##}",
+                $"Діагоналі: d = √(a² + b² ± 2 · a · b · cos α) = {Diagonals[0]:0.##} і {Diagonals[1]:0.##}"
+            };
+        }
+
         // Конструктор за замовчуванням: паралелограм зі сторонами 5 і 3 та кутом 60°
         public Parallelogram() : this(5, 3, 60)
         {
