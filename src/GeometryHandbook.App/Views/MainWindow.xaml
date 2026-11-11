@@ -29,7 +29,7 @@
                 <MenuItem Header="_Сортувати за площею"/>
                 <MenuItem Header="_Фільтр за периметром ±10%"/>
                 <Separator/>
-                <MenuItem Header="_Колір заливки..."/>
+                <MenuItem Header="_Зафарбувати" Command="{Binding FillFigureCommand}"/>
                 <MenuItem Header="_Масштабувати..."/>
             </MenuItem>
             <MenuItem Header="_Довідка">
@@ -52,7 +52,23 @@
             <Button Content="Сортувати" ToolTip="Сортувати фігури за площею"/>
             <Button Content="Фільтр ±10%" ToolTip="Фігури з периметром у межах ±10% від середнього"/>
             <Separator/>
-            <Button Content="Колір" ToolTip="Змінити колір заливки вибраної фігури"/>
+            <ComboBox ItemsSource="{Binding FillColors}"
+                      SelectedItem="{Binding SelectedColor}"
+                      Style="{StaticResource {x:Type ComboBox}}"
+                      Width="170"
+                      MaxDropDownHeight="320"
+                      ToolTip="Колір для заливки">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Width="14" Height="14" RadiusX="3" RadiusY="3" Fill="{Binding}" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Content="Зафарбувати" Command="{Binding FillFigureCommand}" ToolTip="Зафарбувати вибрану фігуру вибраним кольором"/>
+            <Separator/>
             <Button Content="Масштаб" ToolTip="Масштабувати вибрану фігуру"/>
         </ToolBar>
 
@@ -90,6 +106,7 @@
                             <ContextMenu>
                                 <MenuItem Header="Нова фігура..." Command="{Binding AddFigureCommand}"/>
                                 <MenuItem Header="Видалити" Command="{Binding DeleteFigureCommand}"/>
+                                <MenuItem Header="Зафарбувати" Command="{Binding FillFigureCommand}"/>
                             </ContextMenu>
                         </ListBox.ContextMenu>
 
@@ -159,8 +176,8 @@
 
                         <Path x:Name="FigurePath"
                               Data="{Binding SelectedFigure.Geometry}"
-                              Fill="{Binding SelectedFigure.Model.FillColor}"
-                              Stroke="{StaticResource AccentBrush}"
+                              Fill="{Binding SelectedFigure.FillColor}"
+                             Stroke="{Binding SelectedFigure.FillColor}"
                               StrokeThickness="2"
                               Margin="20"
                               HorizontalAlignment="Left"

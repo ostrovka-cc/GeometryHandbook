@@ -22,6 +22,18 @@ namespace GeometryHandbook.App.ViewModels
 
 
         public Geometry Geometry => FigureGeometryBuilder.Build(Model);
+
+        // Колір заливки; при зміні повідомляємо вікно, щоб полотно перемалювало фігуру
+        public string FillColor
+        {
+            get { return Model.FillColor; }
+            set
+            {
+                Model.FillColor = value;
+                OnPropertyChanged();
+            }
+        }
+
         // Текст для рядка списку 
         public string Title => Model.ToString();
 
