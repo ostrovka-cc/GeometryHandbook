@@ -30,7 +30,7 @@
                 <MenuItem Header="_Фільтр за периметром ±10%"/>
                 <Separator/>
                 <MenuItem Header="_Зафарбувати" Command="{Binding FillFigureCommand}"/>
-                <MenuItem Header="_Масштабувати..."/>
+                <MenuItem Header="_Масштабувати" Command="{Binding ScaleFigureCommand}"/>
             </MenuItem>
             <MenuItem Header="_Довідка">
                 <MenuItem Header="_Про програму"/>
@@ -68,8 +68,6 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <Button Content="Зафарбувати" Command="{Binding FillFigureCommand}" ToolTip="Зафарбувати вибрану фігуру вибраним кольором"/>
-            <Separator/>
-            <Button Content="Масштаб" ToolTip="Масштабувати вибрану фігуру"/>
         </ToolBar>
 
         <StatusBar DockPanel.Dock="Bottom"
@@ -106,7 +104,9 @@
                             <ContextMenu>
                                 <MenuItem Header="Нова фігура..." Command="{Binding AddFigureCommand}"/>
                                 <MenuItem Header="Видалити" Command="{Binding DeleteFigureCommand}"/>
+                                <Separator/>
                                 <MenuItem Header="Зафарбувати" Command="{Binding FillFigureCommand}"/>
+                                <MenuItem Header="Масштабувати" Command="{Binding ScaleFigureCommand}"/>
                             </ContextMenu>
                         </ListBox.ContextMenu>
 
@@ -118,7 +118,7 @@
                             <DataTemplate>
                                 <StackPanel Margin="0,4">
                                     <TextBlock Text="{Binding Model.DisplayName}"/>
-                                    <TextBlock Text="{Binding Model.Area, StringFormat='S = {0:0.##} см²'}"
+                                    <TextBlock Text="{Binding Area, StringFormat='S = {0:0.##} см²'}"
                                                Foreground="{StaticResource SecondaryTextBrush}"
                                                FontSize="12"/>
                                 </StackPanel>
@@ -129,61 +129,93 @@
             </Border>
 
             <Border Grid.Column="1" Style="{StaticResource PanelStyle}" Padding="4">
-                <ScrollViewer x:Name="FigureScroll"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto"
-                              PreviewMouseWheel="FigureScroll_PreviewMouseWheel">
-                    <Grid Width="20040"
-                          Height="20040"
-                          Background="{StaticResource CanvasBrush}"
-                          HorizontalAlignment="Left"
-                          VerticalAlignment="Top">
-                        <Grid.LayoutTransform>
-                            <ScaleTransform x:Name="SheetScale" ScaleX="1" ScaleY="1"/>
-                        </Grid.LayoutTransform>
+                <DockPanel>
 
-                        <Rectangle x:Name="MinorGrid">
-                            <Rectangle.Fill>
-                                <DrawingBrush TileMode="Tile"
-                                              Viewport="0,0,20,20" ViewportUnits="Absolute"
-                                              Viewbox="0,0,20,20" ViewboxUnits="Absolute">
-                                    <DrawingBrush.Drawing>
-                                        <GeometryDrawing Geometry="M0,0 L20,0 M0,0 L0,20">
-                                            <GeometryDrawing.Pen>
-                                                <Pen x:Name="MinorGridPen" Brush="#2A2A2A" Thickness="2"/>
-                                            </GeometryDrawing.Pen>
-                                        </GeometryDrawing>
-                                    </DrawingBrush.Drawing>
-                                </DrawingBrush>
-                            </Rectangle.Fill>
-                        </Rectangle>
+                    <Border DockPanel.Dock="Bottom"
+                            BorderBrush="{StaticResource LineBrush}"
+                            BorderThickness="0,1,0,0"
+                            Padding="8,8,8,4">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Масштаб ×"
+                                       VerticalAlignment="Center"
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       Margin="0,0,8,0"/>
+                            <TextBox Text="{Binding ScaleText, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="90"
+                                     VerticalContentAlignment="Center"
+                                     ToolTip="Масштаб відносно початкового розміру; введіть число й натисніть Enter">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding ScaleFigureCommand}"/>
+                                </TextBox.InputBindings>
+                            </TextBox>
+                            <Button Content="Застосувати"
+                                    Command="{Binding ScaleFigureCommand}"
+                                    ToolTip="Встановити вибраній фігурі цей масштаб"
+                                    Margin="8,0,0,0"/>
+                            <TextBlock Text="1 — початковий розмір"
+                                       VerticalAlignment="Center"
+                                       Foreground="{StaticResource SecondaryTextBrush}"
+                                       Margin="16,0,0,0"/>
+                        </StackPanel>
+                    </Border>
 
-                        <Rectangle>
-                            <Rectangle.Fill>
-                                <DrawingBrush TileMode="Tile"
-                                              Viewport="0,0,200,200" ViewportUnits="Absolute"
-                                              Viewbox="0,0,200,200" ViewboxUnits="Absolute">
-                                    <DrawingBrush.Drawing>
-                                        <GeometryDrawing Geometry="M0,0 L200,0 M0,0 L0,200">
-                                            <GeometryDrawing.Pen>
-                                                <Pen x:Name="MajorGridPen" Brush="#3E3E3E" Thickness="4"/>
-                                            </GeometryDrawing.Pen>
-                                        </GeometryDrawing>
-                                    </DrawingBrush.Drawing>
-                                </DrawingBrush>
-                            </Rectangle.Fill>
-                        </Rectangle>
-
-                        <Path x:Name="FigurePath"
-                              Data="{Binding SelectedFigure.Geometry}"
-                              Fill="{Binding SelectedFigure.FillColor}"
-                             Stroke="{Binding SelectedFigure.FillColor}"
-                              StrokeThickness="2"
-                              Margin="20"
+                    <ScrollViewer x:Name="FigureScroll"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto"
+                                  PreviewMouseWheel="FigureScroll_PreviewMouseWheel">
+                        <Grid Width="20040"
+                              Height="20040"
+                              Background="{StaticResource CanvasBrush}"
                               HorizontalAlignment="Left"
-                              VerticalAlignment="Top"/>
-                    </Grid>
-                </ScrollViewer>
+                              VerticalAlignment="Top">
+                            <Grid.LayoutTransform>
+                                <ScaleTransform x:Name="SheetScale" ScaleX="1" ScaleY="1"/>
+                            </Grid.LayoutTransform>
+
+                            <Rectangle x:Name="MinorGrid">
+                                <Rectangle.Fill>
+                                    <DrawingBrush TileMode="Tile"
+                                                  Viewport="0,0,20,20" ViewportUnits="Absolute"
+                                                  Viewbox="0,0,20,20" ViewboxUnits="Absolute">
+                                        <DrawingBrush.Drawing>
+                                            <GeometryDrawing Geometry="M0,0 L20,0 M0,0 L0,20">
+                                                <GeometryDrawing.Pen>
+                                                    <Pen x:Name="MinorGridPen" Brush="#2A2A2A" Thickness="2"/>
+                                                </GeometryDrawing.Pen>
+                                            </GeometryDrawing>
+                                        </DrawingBrush.Drawing>
+                                    </DrawingBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+
+                            <Rectangle>
+                                <Rectangle.Fill>
+                                    <DrawingBrush TileMode="Tile"
+                                                  Viewport="0,0,200,200" ViewportUnits="Absolute"
+                                                  Viewbox="0,0,200,200" ViewboxUnits="Absolute">
+                                        <DrawingBrush.Drawing>
+                                            <GeometryDrawing Geometry="M0,0 L200,0 M0,0 L0,200">
+                                                <GeometryDrawing.Pen>
+                                                    <Pen x:Name="MajorGridPen" Brush="#3E3E3E" Thickness="4"/>
+                                                </GeometryDrawing.Pen>
+                                            </GeometryDrawing>
+                                        </DrawingBrush.Drawing>
+                                    </DrawingBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+
+                            <Path x:Name="FigurePath"
+                                  Data="{Binding SelectedFigure.Geometry}"
+                                  Fill="{Binding SelectedFigure.FillColor}"
+                                  Stroke="{StaticResource TextBrush}"
+                                  StrokeThickness="2"
+                                  Margin="20"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"/>
+                        </Grid>
+                    </ScrollViewer>
+
+                </DockPanel>
             </Border>
 
             <Border Grid.Column="2"

@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using GeometryHandbook.App.Commands;
 using GeometryHandbook.App.Services;
 using GeometryHandbook.Core.Catalog;
+using GeometryHandbook.Core.Exceptions;
 using GeometryHandbook.Core.Figures;
 
 namespace GeometryHandbook.App.ViewModels
@@ -25,6 +27,9 @@ namespace GeometryHandbook.App.ViewModels
         // Поле для властивості SelectedColor; за замовчуванням перший колір зі списку
         private string _selectedColor = "SteelBlue";
 
+        // Поле для властивості ScaleText; 1 — початковий розмір
+        private string _scaleText = "1";
+
         // Каталог і сервіс вікон створюються в App.OnStartup і передаються сюди
         public MainViewModel(FigureCatalog catalog, IDialogService dialogService)
         {
@@ -35,6 +40,7 @@ namespace GeometryHandbook.App.ViewModels
             AddFigureCommand = new RelayCommand(AddFigure);
             DeleteFigureCommand = new RelayCommand(DeleteFigure, HasSelectedFigure);
             FillFigureCommand = new RelayCommand(FillFigure, HasSelectedFigure);
+            ScaleFigureCommand = new RelayCommand(ScaleFigure, HasSelectedFigure);
         }
 
         // Усі додані фігури (список ліворуч); ObservableCollection сама повідомляє список про зміни
@@ -48,6 +54,12 @@ namespace GeometryHandbook.App.ViewModels
             {
                 _selectedFigure = value;
                 OnPropertyChanged();
+
+                // Поле масштабу показує масштаб щойно вибраної фігури
+                if (_selectedFigure != null)
+                {
+                    ScaleText = _selectedFigure.CurrentScale.ToString("0.##");
+                }
             }
         }
 
@@ -82,6 +94,17 @@ namespace GeometryHandbook.App.ViewModels
             }
         }
 
+        // Текст масштабу з поля під полотном (перевіряємо в ScaleFigure)
+        public string ScaleText
+        {
+            get { return _scaleText; }
+            set
+            {
+                _scaleText = value;
+                OnPropertyChanged();
+            }
+        }
+
         // Команда кнопки «Нова фігура», пункту меню й контекстного меню
         public RelayCommand AddFigureCommand { get; }
 
@@ -90,6 +113,9 @@ namespace GeometryHandbook.App.ViewModels
 
         // Команда кнопки «Зафарбувати», пункту меню й контекстного меню
         public RelayCommand FillFigureCommand { get; }
+
+        // Команда кнопки «Застосувати», клавіші Enter у полі масштабу, пункту меню й контекстного меню
+        public RelayCommand ScaleFigureCommand { get; }
 
         // Відкриває вікно «Нова фігура» і додає створену фігуру до списку
         private void AddFigure()
@@ -148,7 +174,43 @@ namespace GeometryHandbook.App.ViewModels
             StatusMessage = $"{SelectedFigure.Model.DisplayName} зафарбовано: {SelectedFigure.FillColor}";
         }
 
-        // Чи вибрана фігура у списку; від цього кнопки «Видалити» й «Зафарбувати» активні або сірі
+        // Встановлює вибраній фігурі масштаб із поля під полотном (відносно початкового розміру)
+        private void ScaleFigure()
+        {
+            if (SelectedFigure == null)
+            {
+                return;
+            }
+
+            // Перетворюємо текст на число; кома й крапка обидві підходять
+            string text = ScaleText.Replace(',', '.');
+            bool isNumber = double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out double scale);
+            if (isNumber == false)
+            {
+                StatusMessage = $"Масштаб «{ScaleText}» не є числом.";
+                return;
+            }
+
+            // Масштаб 0 або від'ємний не має сенсу
+            if (scale <= 0)
+            {
+                StatusMessage = "Масштаб має бути більшим за нуль.";
+                return;
+            }
+
+            try
+            {
+                SelectedFigure.SetScale(scale);
+                StatusMessage = $"{SelectedFigure.Model.DisplayName}: масштаб × {scale}";
+            }
+            catch (FigureException ex)
+            {
+                // Наприклад, якщо після масштабування розміри стали б завеликими
+                StatusMessage = ex.Message;
+            }
+        }
+
+        // Чи вибрана фігура у списку; від цього кнопки «Видалити», «Зафарбувати» і «Застосувати» активні або сірі
         private bool HasSelectedFigure()
         {
             return SelectedFigure != null;
