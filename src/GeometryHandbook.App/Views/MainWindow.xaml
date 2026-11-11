@@ -11,19 +11,25 @@
         Width="1150"
         Style="{StaticResource WindowStyle}">
 
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenFileCommand}"/>
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveFileCommand}"/>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding AddFigureCommand}"/>
+    </Window.InputBindings>
+
     <DockPanel>
 
         <Menu DockPanel.Dock="Top" Background="{StaticResource BackgroundBrush}">
             <MenuItem Header="_Файл">
-                <MenuItem Header="_Відкрити..."/>
-                <MenuItem Header="_Зберегти..."/>
+                <MenuItem Header="_Відкрити..." Command="{Binding OpenFileCommand}" InputGestureText="Ctrl+O"/>
+                <MenuItem Header="_Зберегти..." Command="{Binding SaveFileCommand}" InputGestureText="Ctrl+S"/>
                 <Separator/>
-                <MenuItem Header="Ви_хід"/>
+                <MenuItem Header="Ви_хід" Command="{Binding ExitCommand}"/>
             </MenuItem>
             <MenuItem Header="Ф_ігура">
-                <MenuItem Header="_Нова фігура..." Command="{Binding AddFigureCommand}"/>
+                <MenuItem Header="_Нова фігура..." Command="{Binding AddFigureCommand}" InputGestureText="Ctrl+N"/>
                 <MenuItem Header="_Редагувати..." Command="{Binding EditFigureCommand}"/>
-                <MenuItem Header="Ви_далити" Command="{Binding DeleteFigureCommand}"/>
+                <MenuItem Header="Ви_далити" Command="{Binding DeleteFigureCommand}" InputGestureText="Delete"/>
             </MenuItem>
             <MenuItem Header="_Дії">
                 <MenuItem Header="_Сортувати за площею" Command="{Binding SortFiguresCommand}"/>
@@ -33,21 +39,21 @@
                 <MenuItem Header="_Масштабувати" Command="{Binding ScaleFigureCommand}"/>
             </MenuItem>
             <MenuItem Header="_Довідка">
-                <MenuItem Header="_Про програму"/>
+                <MenuItem Header="_Про програму" Command="{Binding AboutCommand}"/>
             </MenuItem>
         </Menu>
 
         <ToolBar DockPanel.Dock="Top" Background="{StaticResource BackgroundBrush}" Padding="6,4">
-            <Button Content="Відкрити" ToolTip="Відкрити фігури з файлу"/>
-            <Button Content="Зберегти" ToolTip="Зберегти фігури у файл"/>
+            <Button Content="Відкрити" Command="{Binding OpenFileCommand}" ToolTip="Відкрити фігури з файлу (Ctrl+O)"/>
+            <Button Content="Зберегти" Command="{Binding SaveFileCommand}" ToolTip="Зберегти фігури у файл (Ctrl+S)"/>
             <Separator/>
             <Button Content="+ Нова фігура"
                     Style="{StaticResource BlueButtonStyle}"
                     Command="{Binding AddFigureCommand}"
-                    ToolTip="Додати нову фігуру"
+                    ToolTip="Додати нову фігуру (Ctrl+N)"
                     Margin="4,0"/>
             <Button Content="Редагувати" Command="{Binding EditFigureCommand}" ToolTip="Змінити розміри вибраної фігури"/>
-            <Button Content="Видалити" Command="{Binding DeleteFigureCommand}" ToolTip="Видалити вибрану фігуру"/>
+            <Button Content="Видалити" Command="{Binding DeleteFigureCommand}" ToolTip="Видалити вибрану фігуру (Delete)"/>
             <Separator/>
             <Button Content="Сортувати" Command="{Binding SortFiguresCommand}" ToolTip="Сортувати фігури за площею за зростанням (метод підрахунку)"/>
             <Button Content="Фільтр ±10%" Command="{Binding FilterByPerimeterCommand}" ToolTip="Фігури з периметром у межах ±10% від середнього"/>

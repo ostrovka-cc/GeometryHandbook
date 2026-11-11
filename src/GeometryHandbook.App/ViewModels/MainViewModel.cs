@@ -1,19 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using GeometryHandbook.App.Commands;
 using GeometryHandbook.App.Services;
 using GeometryHandbook.Core.Algorithms;
 using GeometryHandbook.Core.Catalog;
 using GeometryHandbook.Core.Exceptions;
 using GeometryHandbook.Core.Figures;
+using GeometryHandbook.Core.Persistence;
 
 namespace GeometryHandbook.App.ViewModels
 {
     // Головна ViewModel: список фігур, вибрана фігура, команди головного вікна
     public class MainViewModel : ViewModelBase
     {
-        // Каталог фігур; передається кожному вікну створення чи редагування фігури
+        // Каталог фігур; передається вікнам створення й редагування та FigureReader
         private readonly FigureCatalog _catalog;
 
         // Сервіс для відкриття вікон і повідомлень (ViewModel не працює з вікнами напряму)
@@ -47,6 +50,11 @@ namespace GeometryHandbook.App.ViewModels
 
             // Фільтр завжди активний: для порожнього списку показуємо EmptyFigureCollectionException
             FilterByPerimeterCommand = new RelayCommand(FilterByPerimeter);
+
+            OpenFileCommand = new RelayCommand(OpenFile);
+            SaveFileCommand = new RelayCommand(SaveFile, HasFigures);
+            AboutCommand = new RelayCommand(ShowAbout);
+            ExitCommand = new RelayCommand(Exit);
         }
 
         // Усі додані фігури (список ліворуч); ObservableCollection сама повідомляє список про зміни
@@ -111,7 +119,7 @@ namespace GeometryHandbook.App.ViewModels
             }
         }
 
-        // Команда кнопки «Нова фігура», пункту меню й контекстного меню
+        // Команда кнопки «Нова фігура», пункту меню, контекстного меню й Ctrl+N
         public RelayCommand AddFigureCommand { get; }
 
         // Команда кнопки «Редагувати», пункту меню, контекстного меню й подвійного кліку на фігурі
@@ -131,6 +139,18 @@ namespace GeometryHandbook.App.ViewModels
 
         // Команда кнопки «Фільтр ±10%» і пункту меню
         public RelayCommand FilterByPerimeterCommand { get; }
+
+        // Команда кнопки «Відкрити», пункту меню й Ctrl+O
+        public RelayCommand OpenFileCommand { get; }
+
+        // Команда кнопки «Зберегти», пункту меню й Ctrl+S
+        public RelayCommand SaveFileCommand { get; }
+
+        // Команда пункту меню «Про програму»
+        public RelayCommand AboutCommand { get; }
+
+        // Команда пункту меню «Вихід»
+        public RelayCommand ExitCommand { get; }
 
         // Відкриває вікно «Нова фігура» і додає створену фігуру до списку
         private void AddFigure()
@@ -319,6 +339,120 @@ namespace GeometryHandbook.App.ViewModels
             _dialogService.ShowPerimeterReport(report);
         }
 
+        // Читає фігури з файлу оператором >> і замінює ними поточний список
+        private void OpenFile()
+        {
+            string? path = _dialogService.AskOpenFilePath();
+            if (path == null)
+            {
+                StatusMessage = "Відкриття скасовано";
+                return;
+            }
+
+            // Читаємо в тимчасовий список: якщо у файлі помилка, поточні фігури не зникнуть
+            var loaded = new List<Figure>();
+            try
+            {
+                // using закриє файл (Dispose), навіть якщо всередині станеться виняток
+                using (var reader = new FigureReader(path, _catalog))
+                {
+                    _ = reader >> loaded;
+                }
+            }
+            catch (FigureFileFormatException ex)
+            {
+                // Неправильний рядок у файлі; LineNumber показує, у якому саме
+                string message = $"Помилка у файлі, рядок {ex.LineNumber}: {ex.Message}";
+                StatusMessage = message;
+                _dialogService.ShowError(message);
+                return;
+            }
+            catch (IOException ex)
+            {
+                // Файл зник, зайнятий іншою програмою тощо
+                StatusMessage = ex.Message;
+                _dialogService.ShowError($"Не вдалося прочитати файл: {ex.Message}");
+                return;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // Немає прав на читання файлу
+                StatusMessage = ex.Message;
+                _dialogService.ShowError($"Немає доступу до файлу: {ex.Message}");
+                return;
+            }
+
+            // Файл прочитано повністю — замінюємо список
+            Figures.Clear();
+            foreach (Figure figure in loaded)
+            {
+                Figures.Add(new FigureViewModel(figure));
+            }
+
+            // Вибираємо першу фігуру, якщо вони є
+            if (Figures.Count > 0)
+            {
+                SelectedFigure = Figures[0];
+            }
+            else
+            {
+                SelectedFigure = null;
+            }
+
+            StatusMessage = $"Відкрито {Figures.Count} фігур з файлу {Path.GetFileName(path)}";
+        }
+
+        // Записує всі фігури у файл оператором <<
+        private void SaveFile()
+        {
+            string? path = _dialogService.AskSaveFilePath();
+            if (path == null)
+            {
+                StatusMessage = "Збереження скасовано";
+                return;
+            }
+
+            try
+            {
+                // using закриє файл (Dispose), навіть якщо всередині станеться виняток
+                using (var writer = new FigureWriter(path))
+                {
+                    foreach (FigureViewModel item in Figures)
+                    {
+                        _ = writer << item.Model;
+                    }
+                }
+            }
+            catch (IOException ex)
+            {
+                // Диск заповнений, файл зайнятий іншою програмою тощо
+                StatusMessage = ex.Message;
+                _dialogService.ShowError($"Не вдалося записати файл: {ex.Message}");
+                return;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // Немає прав на запис у цю папку чи файл
+                StatusMessage = ex.Message;
+                _dialogService.ShowError($"Немає доступу до файлу: {ex.Message}");
+                return;
+            }
+
+            StatusMessage = $"Збережено {Figures.Count} фігур у файл {Path.GetFileName(path)}";
+        }
+
+        // Показує вікно «Про програму»
+        private void ShowAbout()
+        {
+            _dialogService.ShowAbout();
+        }
+
+        // Закриває програму
+        private void Exit()
+        {
+            _dialogService.ExitApplication();
+        }
+
         // Збирає моделі (Figure) з усіх FigureViewModel, бо алгоритми з Core працюють саме з ними
         private List<Figure> GetModels()
         {
@@ -341,6 +475,12 @@ namespace GeometryHandbook.App.ViewModels
         private bool HasSeveralFigures()
         {
             return Figures.Count >= 2;
+        }
+
+        // Чи є у списку хоч одна фігура; зберігати порожній список немає сенсу
+        private bool HasFigures()
+        {
+            return Figures.Count > 0;
         }
     }
 }
