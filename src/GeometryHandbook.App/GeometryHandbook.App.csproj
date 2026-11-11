@@ -12,8 +12,4 @@
     <ProjectReference Include="..\GeometryHandbook.Core\GeometryHandbook.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Views\Controls\" />
-  </ItemGroup>
-
 </Project>
