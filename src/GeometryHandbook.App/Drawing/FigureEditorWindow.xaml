@@ -1,7 +1,7 @@
 ﻿<Window x:Class="GeometryHandbook.App.Views.Dialogs.FigureEditorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Нова фігура"
+        Title="{Binding WindowTitle}"
         Width="560"
         SizeToContent="Height"
         ResizeMode="NoResize"
@@ -20,7 +20,7 @@
                         IsCancel="True"
                         MinWidth="100"
                         Margin="0,0,8,0"/>
-                <Button Content="Додати"
+                <Button Content="{Binding ConfirmText}"
                         IsDefault="True"
                         MinWidth="100"
                         Style="{StaticResource BlueButtonStyle}"
@@ -38,12 +38,14 @@
                 <TextBlock Text="Тип" Style="{StaticResource LabelStyle}"/>
                 <ComboBox ItemsSource="{Binding TypeNames}"
                           SelectedItem="{Binding SelectedTypeName}"
+                          IsEnabled="{Binding CanChangeType}"
                           Margin="0,0,0,12"/>
 
                 <TextBlock Text="Підтип" Style="{StaticResource LabelStyle}"/>
                 <ComboBox ItemsSource="{Binding Subtypes}"
                           SelectedItem="{Binding SelectedSubtype}"
                           DisplayMemberPath="SubtypeName"
+                          IsEnabled="{Binding CanChangeType}"
                           Margin="0,0,0,12"/>
 
                 <ItemsControl ItemsSource="{Binding Parameters}">
@@ -78,7 +80,7 @@
                                TextWrapping="Wrap"
                                Foreground="{StaticResource SecondaryTextBrush}"
                                Margin="0,0,0,8"/>
-                    <TextBlock Text="Enter — додати, Esc — скасувати."
+                    <TextBlock Text="Enter — підтвердити, Esc — скасувати."
                                TextWrapping="Wrap"
                                Foreground="{StaticResource SecondaryTextBrush}"/>
                 </StackPanel>

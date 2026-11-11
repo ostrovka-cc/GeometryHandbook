@@ -12,7 +12,7 @@ namespace GeometryHandbook.App.ViewModels
     // Головна ViewModel: список фігур, вибрана фігура, команди головного вікна
     public class MainViewModel : ViewModelBase
     {
-        // Каталог фігур; передається кожному новому вікну «Нова фігура»
+        // Каталог фігур; передається кожному вікну створення чи редагування фігури
         private readonly FigureCatalog _catalog;
 
         // Сервіс для відкриття вікон (ViewModel не працює з вікнами напряму)
@@ -38,6 +38,7 @@ namespace GeometryHandbook.App.ViewModels
 
             // Кожна команда знає, який метод виконати; деякі — ще й коли це можна робити
             AddFigureCommand = new RelayCommand(AddFigure);
+            EditFigureCommand = new RelayCommand(EditFigure, HasSelectedFigure);
             DeleteFigureCommand = new RelayCommand(DeleteFigure, HasSelectedFigure);
             FillFigureCommand = new RelayCommand(FillFigure, HasSelectedFigure);
             ScaleFigureCommand = new RelayCommand(ScaleFigure, HasSelectedFigure);
@@ -108,6 +109,9 @@ namespace GeometryHandbook.App.ViewModels
         // Команда кнопки «Нова фігура», пункту меню й контекстного меню
         public RelayCommand AddFigureCommand { get; }
 
+        // Команда кнопки «Редагувати», пункту меню, контекстного меню й подвійного кліку на фігурі
+        public RelayCommand EditFigureCommand { get; }
+
         // Команда кнопки «Видалити», пункту меню, контекстного меню й клавіші Delete
         public RelayCommand DeleteFigureCommand { get; }
 
@@ -138,6 +142,36 @@ namespace GeometryHandbook.App.ViewModels
             SelectedFigure = figureViewModel;
 
             StatusMessage = $"Додано: {figure.DisplayName}";
+        }
+
+        // Відкриває те саме вікно в режимі редагування й переписує розміри вибраної фігури
+        private void EditFigure()
+        {
+            if (SelectedFigure == null)
+            {
+                return;
+            }
+
+            // Редактор із заповненими полями й заблокованим типом
+            var editor = new FigureEditorViewModel(_catalog);
+            editor.LoadFigure(SelectedFigure.Model);
+
+            // Вікно повертає нову фігуру з новими розмірами або null, якщо натиснули «Скасувати»
+            Figure? edited = _dialogService.ShowFigureEditor(editor);
+
+            if (edited == null)
+            {
+                StatusMessage = "Редагування скасовано";
+                return;
+            }
+
+            // Стара фігура переписує розміри з нової (AssignFrom), лишаючись тим самим об'єктом у списку
+            SelectedFigure.ApplyEdit(edited);
+
+            // Після редагування масштаб знову 1
+            ScaleText = "1";
+
+            StatusMessage = $"Змінено: {SelectedFigure.Model.DisplayName}";
         }
 
         // Видаляє вибрану фігуру зі списку
@@ -210,7 +244,7 @@ namespace GeometryHandbook.App.ViewModels
             }
         }
 
-        // Чи вибрана фігура у списку; від цього кнопки «Видалити», «Зафарбувати» і «Застосувати» активні або сірі
+        // Чи вибрана фігура у списку; від цього кнопки редагування, видалення, заливки й масштабу активні або сірі
         private bool HasSelectedFigure()
         {
             return SelectedFigure != null;

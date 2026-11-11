@@ -16,13 +16,13 @@ namespace GeometryHandbook.App.ViewModels
         // Сама фігура з Core
         public Figure Model { get; }
 
-        // Поточний масштаб відносно початкового розміру (1 — фігура такою, як її створили)
+        // Поточний масштаб відносно початкового розміру (1 — фігура такою, як її створили або відредагували)
         public double CurrentScale { get; private set; } = 1;
 
         // Текст фігури (назва й площа)
         public string Title => Model.ToString();
 
-        // Площа для списку фігур; оновлюється після масштабування
+        // Площа для списку фігур; оновлюється після масштабування й редагування
         public double Area => Model.Area;
 
         // Рядки для таблиці «Характеристики»
@@ -56,7 +56,26 @@ namespace GeometryHandbook.App.ViewModels
             // Запам'ятовуємо масштаб лише після успішного Model.Scale (якщо там виняток, сюди не дійдемо)
             CurrentScale = scale;
 
-            // Повідомляємо вікно про все, що змінилось
+            RefreshDrawingAndInfo();
+        }
+
+        // Переписує розміри фігури з відредагованої копії того ж типу (оператор присвоєння AssignFrom)
+        public void ApplyEdit(Figure edited)
+        {
+            // AssignFrom копіює й колір, тому даємо копії поточний колір, щоб він не скинувся
+            edited.FillColor = Model.FillColor;
+
+            Model.AssignFrom(edited);
+
+            // Нові розміри стають новим початковим розміром
+            CurrentScale = 1;
+
+            RefreshDrawingAndInfo();
+        }
+
+        // Повідомляє вікно про все, що змінюється разом із розмірами фігури
+        private void RefreshDrawingAndInfo()
+        {
             OnPropertyChanged(nameof(Geometry));
             OnPropertyChanged(nameof(Properties));
             OnPropertyChanged(nameof(Formulas));

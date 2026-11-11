@@ -6,7 +6,7 @@ using GeometryHandbook.Core.Figures;
 
 namespace GeometryHandbook.App.ViewModels
 {
-    // Дані вікна «Нова фігура»: вибір типу й підтипу, поля параметрів і створення фігури
+    // Дані вікна створення й редагування фігури: тип, підтип, поля параметрів і створення фігури
     public class FigureEditorViewModel : ViewModelBase
     {
         private readonly FigureCatalog _catalog;
@@ -20,6 +20,40 @@ namespace GeometryHandbook.App.ViewModels
 
             // Одразу вибираємо перший тип, щоб вікно не відкривалось порожнім
             SelectedTypeName = TypeNames[0];
+        }
+
+        // true — редагуємо існуючу фігуру, false — створюємо нову (встановлюється в LoadFigure до відкриття вікна)
+        public bool IsEditMode { get; private set; }
+
+        // Тип і підтип можна змінювати лише для нової фігури
+        public bool CanChangeType => IsEditMode == false;
+
+        // Заголовок вікна залежно від режиму
+        public string WindowTitle
+        {
+            get
+            {
+                if (IsEditMode)
+                {
+                    return "Редагування фігури";
+                }
+
+                return "Нова фігура";
+            }
+        }
+
+        // Напис на синій кнопці залежно від режиму
+        public string ConfirmText
+        {
+            get
+            {
+                if (IsEditMode)
+                {
+                    return "Зберегти";
+                }
+
+                return "Додати";
+            }
         }
 
         // Назви типів для першого випадного списку
@@ -98,8 +132,32 @@ namespace GeometryHandbook.App.ViewModels
             }
         }
 
-        // Фігура, створена кнопкою «Додати»; її забирає WpfDialogService після закриття вікна
+        // Фігура, створена кнопкою «Додати»/«Зберегти»; її забирає WpfDialogService після закриття вікна
         public Figure? CreatedFigure { get; private set; }
+
+        // Переводить вікно в режим редагування й заповнює поля розмірами існуючої фігури
+        public void LoadFigure(Figure figure)
+        {
+            // Шукаємо в каталозі підтип цієї фігури за її ключем («Circle», «Square»...)
+            FigureDescriptor? descriptor = _catalog.Find(figure.TypeKey);
+            if (descriptor == null)
+            {
+                throw new FigureException($"Фігуру «{figure.DisplayName}» не знайдено в каталозі.");
+            }
+
+            IsEditMode = true;
+
+            // Спершу тип (він вибере перший підтип), потім потрібний підтип (він створить поля)
+            SelectedTypeName = descriptor.TypeName;
+            SelectedSubtype = descriptor;
+
+            // Заповнюємо поля поточними розмірами; GetParameters повертає їх у тому ж порядку, що й поля
+            IReadOnlyList<double> values = figure.GetParameters();
+            for (int i = 0; i < Parameters.Count; i++)
+            {
+                Parameters[i].Text = values[i].ToString("0.####");
+            }
+        }
 
         // Створює фігуру з введених значень; кидає FigureException, якщо щось не так
         public Figure CreateFigure()
@@ -120,7 +178,7 @@ namespace GeometryHandbook.App.ViewModels
             return SelectedSubtype.Create(values);
         }
 
-        // Викликається кнопкою «Додати»: true, якщо фігуру створено; інакше показуємо помилку
+        // Викликається синьою кнопкою: true, якщо фігуру створено; інакше показуємо помилку
         public bool TryCreateFigure()
         {
             try

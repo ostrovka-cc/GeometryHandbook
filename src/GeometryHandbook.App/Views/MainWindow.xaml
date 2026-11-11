@@ -22,7 +22,7 @@
             </MenuItem>
             <MenuItem Header="Ф_ігура">
                 <MenuItem Header="_Нова фігура..." Command="{Binding AddFigureCommand}"/>
-                <MenuItem Header="_Редагувати..."/>
+                <MenuItem Header="_Редагувати..." Command="{Binding EditFigureCommand}"/>
                 <MenuItem Header="Ви_далити" Command="{Binding DeleteFigureCommand}"/>
             </MenuItem>
             <MenuItem Header="_Дії">
@@ -46,7 +46,7 @@
                     Command="{Binding AddFigureCommand}"
                     ToolTip="Додати нову фігуру"
                     Margin="4,0"/>
-            <Button Content="Редагувати" ToolTip="Змінити розміри вибраної фігури"/>
+            <Button Content="Редагувати" Command="{Binding EditFigureCommand}" ToolTip="Змінити розміри вибраної фігури"/>
             <Button Content="Видалити" Command="{Binding DeleteFigureCommand}" ToolTip="Видалити вибрану фігуру"/>
             <Separator/>
             <Button Content="Сортувати" ToolTip="Сортувати фігури за площею"/>
@@ -103,6 +103,7 @@
                         <ListBox.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Нова фігура..." Command="{Binding AddFigureCommand}"/>
+                                <MenuItem Header="Редагувати..." Command="{Binding EditFigureCommand}"/>
                                 <MenuItem Header="Видалити" Command="{Binding DeleteFigureCommand}"/>
                                 <Separator/>
                                 <MenuItem Header="Зафарбувати" Command="{Binding FillFigureCommand}"/>
@@ -112,6 +113,7 @@
 
                         <ListBox.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding DeleteFigureCommand}"/>
+                            <MouseBinding Gesture="LeftDoubleClick" Command="{Binding EditFigureCommand}"/>
                         </ListBox.InputBindings>
 
                         <ListBox.ItemTemplate>
