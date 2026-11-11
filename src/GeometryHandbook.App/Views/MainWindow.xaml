@@ -23,7 +23,7 @@
             <MenuItem Header="Ф_ігура">
                 <MenuItem Header="_Нова фігура..." Command="{Binding AddFigureCommand}"/>
                 <MenuItem Header="_Редагувати..."/>
-                <MenuItem Header="Ви_далити"/>
+                <MenuItem Header="Ви_далити" Command="{Binding DeleteFigureCommand}"/>
             </MenuItem>
             <MenuItem Header="_Дії">
                 <MenuItem Header="_Сортувати за площею"/>
@@ -47,7 +47,7 @@
                     ToolTip="Додати нову фігуру"
                     Margin="4,0"/>
             <Button Content="Редагувати" ToolTip="Змінити розміри вибраної фігури"/>
-            <Button Content="Видалити" ToolTip="Видалити вибрану фігуру"/>
+            <Button Content="Видалити" Command="{Binding DeleteFigureCommand}" ToolTip="Видалити вибрану фігуру"/>
             <Separator/>
             <Button Content="Сортувати" ToolTip="Сортувати фігури за площею"/>
             <Button Content="Фільтр ±10%" ToolTip="Фігури з периметром у межах ±10% від середнього"/>
@@ -72,7 +72,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="240"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="340"/>
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0"
@@ -85,6 +85,18 @@
                              SelectedItem="{Binding SelectedFigure}"
                              Background="Transparent"
                              BorderThickness="0">
+
+                        <ListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Нова фігура..." Command="{Binding AddFigureCommand}"/>
+                                <MenuItem Header="Видалити" Command="{Binding DeleteFigureCommand}"/>
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+
+                        <ListBox.InputBindings>
+                            <KeyBinding Key="Delete" Command="{Binding DeleteFigureCommand}"/>
+                        </ListBox.InputBindings>
+
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="0,4">
