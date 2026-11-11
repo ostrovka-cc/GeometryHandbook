@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using GeometryHandbook.App.Commands;
 using GeometryHandbook.App.Services;
+using GeometryHandbook.Core.Algorithms;
 using GeometryHandbook.Core.Catalog;
 using GeometryHandbook.Core.Exceptions;
 using GeometryHandbook.Core.Figures;
@@ -15,7 +16,7 @@ namespace GeometryHandbook.App.ViewModels
         // Каталог фігур; передається кожному вікну створення чи редагування фігури
         private readonly FigureCatalog _catalog;
 
-        // Сервіс для відкриття вікон (ViewModel не працює з вікнами напряму)
+        // Сервіс для відкриття вікон і повідомлень (ViewModel не працює з вікнами напряму)
         private readonly IDialogService _dialogService;
 
         // Поле для властивості SelectedFigure (null, якщо нічого не вибрано)
@@ -42,6 +43,10 @@ namespace GeometryHandbook.App.ViewModels
             DeleteFigureCommand = new RelayCommand(DeleteFigure, HasSelectedFigure);
             FillFigureCommand = new RelayCommand(FillFigure, HasSelectedFigure);
             ScaleFigureCommand = new RelayCommand(ScaleFigure, HasSelectedFigure);
+            SortFiguresCommand = new RelayCommand(SortFigures, HasSeveralFigures);
+
+            // Фільтр завжди активний: для порожнього списку показуємо EmptyFigureCollectionException
+            FilterByPerimeterCommand = new RelayCommand(FilterByPerimeter);
         }
 
         // Усі додані фігури (список ліворуч); ObservableCollection сама повідомляє список про зміни
@@ -120,6 +125,12 @@ namespace GeometryHandbook.App.ViewModels
 
         // Команда кнопки «Застосувати», клавіші Enter у полі масштабу, пункту меню й контекстного меню
         public RelayCommand ScaleFigureCommand { get; }
+
+        // Команда кнопки «Сортувати» і пункту меню
+        public RelayCommand SortFiguresCommand { get; }
+
+        // Команда кнопки «Фільтр ±10%» і пункту меню
+        public RelayCommand FilterByPerimeterCommand { get; }
 
         // Відкриває вікно «Нова фігура» і додає створену фігуру до списку
         private void AddFigure()
@@ -244,10 +255,92 @@ namespace GeometryHandbook.App.ViewModels
             }
         }
 
+        // Сортує список фігур за площею (за зростанням) методом підрахунку
+        private void SortFigures()
+        {
+            IReadOnlyList<Figure> sorted;
+            try
+            {
+                sorted = CountingSorter.SortByArea(GetModels());
+            }
+            catch (FigureException ex)
+            {
+                // Наприклад, якщо площі відрізняються надто сильно для сортування підрахунком
+                StatusMessage = ex.Message;
+                return;
+            }
+
+            // Для кожної відсортованої моделі знаходимо її FigureViewModel (там колір і масштаб)
+            var sortedViewModels = new List<FigureViewModel>();
+            foreach (Figure model in sorted)
+            {
+                foreach (FigureViewModel item in Figures)
+                {
+                    if (ReferenceEquals(item.Model, model))
+                    {
+                        sortedViewModels.Add(item);
+                        break;
+                    }
+                }
+            }
+
+            // Clear скидає вибір у списку, тому запам'ятовуємо вибрану фігуру, щоб повернути її після
+            FigureViewModel? selected = SelectedFigure;
+
+            // Заповнюємо список заново вже у відсортованому порядку
+            Figures.Clear();
+            foreach (FigureViewModel item in sortedViewModels)
+            {
+                Figures.Add(item);
+            }
+
+            SelectedFigure = selected;
+
+            StatusMessage = $"Відсортовано за площею: {Figures.Count} фігур";
+        }
+
+        // Показує вікно звіту з фігурами, периметр яких у межах ±10% від середнього
+        private void FilterByPerimeter()
+        {
+            PerimeterReportViewModel report;
+            try
+            {
+                report = new PerimeterReportViewModel(GetModels());
+            }
+            catch (EmptyFigureCollectionException ex)
+            {
+                // Список порожній — середній периметр порахувати неможливо
+                StatusMessage = ex.Message;
+                _dialogService.ShowError(ex.Message);
+                return;
+            }
+
+            StatusMessage = report.Summary;
+            _dialogService.ShowPerimeterReport(report);
+        }
+
+        // Збирає моделі (Figure) з усіх FigureViewModel, бо алгоритми з Core працюють саме з ними
+        private List<Figure> GetModels()
+        {
+            var models = new List<Figure>();
+            foreach (FigureViewModel item in Figures)
+            {
+                models.Add(item.Model);
+            }
+
+            return models;
+        }
+
         // Чи вибрана фігура у списку; від цього кнопки редагування, видалення, заливки й масштабу активні або сірі
         private bool HasSelectedFigure()
         {
             return SelectedFigure != null;
+        }
+
+        // Чи є у списку хоча б дві фігури; сортувати одну немає сенсу
+        private bool HasSeveralFigures()
+        {
+            return Figures.Count >= 2;
         }
     }
 }

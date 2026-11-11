@@ -1,0 +1,52 @@
+﻿<Window x:Class="GeometryHandbook.App.Views.Dialogs.PerimeterReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Фільтр за периметром ±10%"
+        Width="460"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Style="{StaticResource WindowStyle}">
+
+    <DockPanel>
+
+        <Border DockPanel.Dock="Bottom"
+                BorderBrush="{StaticResource LineBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="16,12">
+            <Button Content="Закрити"
+                    IsCancel="True"
+                    IsDefault="True"
+                    MinWidth="100"
+                    HorizontalAlignment="Right"
+                    Style="{StaticResource BlueButtonStyle}"/>
+        </Border>
+
+        <StackPanel Margin="16">
+            <TextBlock Text="{Binding AverageText}" Margin="0,0,0,4"/>
+            <TextBlock Text="{Binding BoundsText}"
+                       Foreground="{StaticResource SecondaryTextBrush}"
+                       Margin="0,0,0,16"/>
+
+            <TextBlock Text="{Binding Summary}" Style="{StaticResource HeaderStyle}"/>
+
+            <DataGrid ItemsSource="{Binding FoundFigures}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="{StaticResource LineBrush}"
+                      Background="Transparent"
+                      RowBackground="Transparent"
+                      BorderThickness="0"
+                      MaxHeight="300">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Фігура" Binding="{Binding DisplayName}" Width="*"/>
+                    <DataGridTextColumn Header="Периметр, см" Binding="{Binding Perimeter, StringFormat={}{0:0.##}}" Width="Auto"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+
+    </DockPanel>
+</Window>

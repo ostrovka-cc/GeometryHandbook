@@ -26,8 +26,8 @@
                 <MenuItem Header="Ви_далити" Command="{Binding DeleteFigureCommand}"/>
             </MenuItem>
             <MenuItem Header="_Дії">
-                <MenuItem Header="_Сортувати за площею"/>
-                <MenuItem Header="_Фільтр за периметром ±10%"/>
+                <MenuItem Header="_Сортувати за площею" Command="{Binding SortFiguresCommand}"/>
+                <MenuItem Header="_Фільтр за периметром ±10%..." Command="{Binding FilterByPerimeterCommand}"/>
                 <Separator/>
                 <MenuItem Header="_Зафарбувати" Command="{Binding FillFigureCommand}"/>
                 <MenuItem Header="_Масштабувати" Command="{Binding ScaleFigureCommand}"/>
@@ -49,8 +49,8 @@
             <Button Content="Редагувати" Command="{Binding EditFigureCommand}" ToolTip="Змінити розміри вибраної фігури"/>
             <Button Content="Видалити" Command="{Binding DeleteFigureCommand}" ToolTip="Видалити вибрану фігуру"/>
             <Separator/>
-            <Button Content="Сортувати" ToolTip="Сортувати фігури за площею"/>
-            <Button Content="Фільтр ±10%" ToolTip="Фігури з периметром у межах ±10% від середнього"/>
+            <Button Content="Сортувати" Command="{Binding SortFiguresCommand}" ToolTip="Сортувати фігури за площею за зростанням (метод підрахунку)"/>
+            <Button Content="Фільтр ±10%" Command="{Binding FilterByPerimeterCommand}" ToolTip="Фігури з периметром у межах ±10% від середнього"/>
             <Separator/>
             <ComboBox ItemsSource="{Binding FillColors}"
                       SelectedItem="{Binding SelectedColor}"

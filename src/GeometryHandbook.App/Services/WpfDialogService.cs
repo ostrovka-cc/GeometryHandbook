@@ -24,5 +24,23 @@ namespace GeometryHandbook.App.Services
 
             return null;
         }
+
+        public void ShowPerimeterReport(PerimeterReportViewModel report)
+        {
+            var window = new PerimeterReportWindow(report);
+            window.Owner = Application.Current.MainWindow;
+            window.ShowDialog();
+        }
+
+        public void ShowError(string message)
+        {
+            // Стандартне вікно Windows з червоною іконкою помилки й кнопкою OK
+            MessageBox.Show(
+                Application.Current.MainWindow,
+                message,
+                "Помилка",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
     }
 }
